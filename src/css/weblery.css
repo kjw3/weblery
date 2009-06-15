@@ -1,0 +1,150 @@
+/*
+//Author: Kevin Jones
+//Email: kevin.d.jones@gmail.com
+//Web Address: http://www.weblery.com/
+//Date Last Modified: 06/10/2009
+//Copyright: Kevin Jones 2009
+//License: ./documentation/License.txt
+//
+//Note: You may edit this document if needing to
+//modify the look and feel of weblery
+//
+//Please read over the documents in the documentation folder
+*/
+
+* { margin: 0; }
+
+p {
+	padding: 10px;
+	font-size: small;
+}
+
+img { border: none; }
+
+A:link 	{color: #68A1D6; font-weight: bold; text-decoration: none;}
+A:visited	{color: #68A1D6; font-weight: bold; text-decoration: none;}
+A:link:active, A:visited:active {color: #68A1D6; font-weight: bold; text-decoration: none;}
+A:link:hover, A:visited:hover {color: #09679A; font-weight: bold; text-decoration: none;}
+
+A.content-link:link 	{color: #68A1D6; font-size: x-small; font-weight: bold; text-decoration: none;}
+A.content-link:visited	{color: #68A1D6; font-size: x-small; font-weight: bold; text-decoration: none;}
+A.content-link:link:active, A.content-link:visited:active {color: #68A1D6; font-size: x-small; font-weight: bold; text-decoration: none;}
+A.content-link:link:hover, A.content-link:visited:hover {color: #09679A; font-size: x-small; font-weight: bold; text-decoration: none;}
+
+.clear {
+	clear: both;
+}
+
+.float-left-container {
+	float: left;
+}
+
+/*** Gallery Styles ***/
+#current-image {
+	position: relative;
+	margin: 2px;
+	padding: 2px;
+	background-color: #DCE7F1;
+	text-align: center;
+}
+
+#preview-image {
+	display: none;
+	position:absolute;
+	top: 2px;
+	left:0;
+	right:0;
+	text-align: center;
+	z-index: 99;
+}
+
+.thumbnail-container {
+	position: relative;
+	z-index:100;
+}
+
+.thumbnail-container ul {
+	padding: 0;
+	list-style: none;
+}
+
+.thumbnail-container li {
+	display: block;
+	width: 48px;
+	height: 48px;
+	padding: 2px;
+}
+
+.thumbnailClear {
+	clear: left;
+	line-height: 0;
+	height: 0;
+}
+/*** End Gallery Styles ***/
+
+/*** Basic Tab CSS ***/
+.basictab{
+	width: 790px;
+	margin-top: 0;
+	margin-right: 10px;
+	margin-bottom: 0;
+	padding: 3px 0;
+	border-bottom: 1px solid #727375;
+	list-style-type: none;
+	font-weight: bold;
+	font-size: x-small;
+	text-align: left; /*set to left, center, or right to align the menu as desired*/
+}
+
+.basictab li{
+	position: relative;
+	display: inline;
+	margin: 0;
+}
+
+.basictab li a{
+	margin-right: 1px;	
+	padding: 3px 7px;
+	background-color: #fff;
+	border: 1px solid #727375;
+	border-bottom: none;
+	color: #727375;
+	text-decoration: none;
+}
+
+.basictab li a:visited{ color: #727375; }
+
+.basictab li a:hover{
+	background-color: #dddddd;
+	color: black;
+}
+
+.basictab li a:active{ color: black; }
+
+.basictab li.selected a{ /*selected tab effect*/
+	position: relative;
+	top: 1px;
+	padding-top: 4px;
+	background-color: #DCE7F1;
+	color: black;
+}
+
+#basictab-content-container {
+	position: relative;
+	width: 788px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+	background-color: #DCE7F1;
+	border-top: none;
+	border-left: 1px solid #727375;
+	border-right: 1px solid #727375;
+	border-bottom: 1px solid #727375;
+	color: #727375;
+}
+/*** End Basic Tab CSS ***/
+
+/*** Dialog Override ***/
+.ui-dialog .ui-dialog-titlebar { padding: 3px 2px 2px 2px; position: relative;  }
+.ui-dialog .ui-dialog-title { float: left; margin: 0; font-size:large; } 
+.ui-dialog .ui-dialog-buttonpane { text-align: left; border-width: 1px 0 0 0; background-image: none; margin: .1em 0 0 0; padding: .1em .1em .1em .1em; }
+.ui-dialog .ui-dialog-buttonpane button { float: right; margin: .2em .1em .1em 0; cursor: pointer; padding: .1em .1em .1em .1em; line-height: 1em; width:auto; overflow:visible; }
