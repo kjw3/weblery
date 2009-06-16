@@ -211,26 +211,24 @@ function getShutterSpeed(exifValue)
 }
 
 //Preloading Images for current photo set
-jQuery.preloadImages = function(imageSize,thumbsToUse) {
+jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse) {
 	preloadArray = new Array();
 	j=0;
 	switch(imageSize) {
 		case "320" :
 			oppositeImageSize = "640";
 			break;
-		case "640" :
-			oppositeImageSize = "320";
-			break;
 		default:
-			oppositeImageSize = "640";
+			oppositeImageSize = "320";
 			break;
 	}
 	
 	for (i=0;i<thumbsToUse.length;i++) {
 		preloadArray[j] = thumbsToUse[i].replace(mainImageSize + "_", oppositeImageSize + "_");
-		preloadArray[j+1] = thumbsToUse[i].replace(mainImageSize + "_", "");
-		preloadArray[j+2] = thumbsToUse[i];
-		j += 3;
+		preloadArray[j+1] = thumbsToUse[i].replace(mainImageSize + "_", "tn_");
+		preloadArray[j+2] = origsToUse[i];
+		preloadArray[j+3] = thumbsToUse[i];
+		j += 4;
 	}
   
 	imageObj = new Image();

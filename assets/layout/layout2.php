@@ -9,7 +9,7 @@
 //Note: This is layout2 a default layout provided
 //with Weblery.  You can copy this code and paste
 //into another php file that you create in the
-//./src/layout folder.  Then change the confLayoutFile
+//./assets/layout folder.  Then change the confLayoutFile
 //variable in the ./configuration.php file
 //to the name of your new file.
 //
@@ -54,8 +54,8 @@
 					}
 					?>
 					<div id="current-image" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;">
-						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo self::__get('selectedAlbumPath') . "320_" . $currentAlbumArray[0]; ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Preview Image" /></div>
-						<img id="current-image-img" src="<?php echo self::__get('selectedAlbumPath') . self::__get('mainImageSize') . "_" . $currentAlbumArray[$currentImageId]; ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
+						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo self::__get('selectedAlbumCachePath') . "320_" . md5($currentAlbumArray[0]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Preview Image" /></div>
+						<img id="current-image-img" src="<?php echo self::__get('selectedAlbumCachePath') . self::__get('mainImageSize') . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
 					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;"><img id="current-image-original-img" src="<?php echo self::__get('selectedAlbumPath') .  $currentAlbumArray[$currentImageId]; ?>" style="display:none;" alt="Current Image" /></div>
 					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
 						<div id="photo-detail">

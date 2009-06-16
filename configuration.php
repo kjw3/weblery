@@ -1,7 +1,11 @@
 <?php
 /************** Configuration Parameters ***********************/
-//The path to your album directory
-DEFINE('confGalleryBasePath','./albums/');
+
+//The path to your weblery.php file
+DEFINE('confWebleryBasePath','');
+
+//The path to your album directory relative to your weblery.php file
+DEFINE('confGalleryBasePath','albums/');
 
 //Set the file name where the weblery class is included
 DEFINE('confBaseStartPage','demo.php');
