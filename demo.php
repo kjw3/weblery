@@ -11,7 +11,14 @@
 //
 //Configuration Parameters are set in configuration.php
 //Please read over the documents in the documentation folder
+
+//If your php version is less than 5, redirect to demophp4.php
+if (PHP_VERSION < 5) {
+	header("Location:demophp4.php");
+}
 ?>
+
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 	<head>
