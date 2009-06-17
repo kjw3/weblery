@@ -29,82 +29,84 @@ $weblery = new weblery();
 <?php
 //Weblery Class Definition
 class weblery {
-	protected static $webleryBasePath = '';
-	protected static $galleryBasePath = '';
-	protected static $initGalleryBasePath = '';
-	protected static $imgBasePath = '';
-	protected static $stillInitializing = false;
-	protected static $baseStartPage = '';
-	protected static $albumCachePath = '';
-	protected static $selectedAlbumCachePath = '';
-	public $start = 0;
-	public $selectedAlbum = '';
+	var $webleryBasePath = '';
+	var $galleryBasePath = '';
+	var $initGalleryBasePath = '';
+	var $imgBasePath = '';
+	var $stillInitializing = false;
+	var $baseStartPage = '';
+	var $albumCachePath = '';
+	var $selectedAlbumCachePath = '';
+	var $start = 0;
+	var $selectedAlbum = '';
 
-	function __construct() {
-		self::__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
-		self::__set('galleryBasePath',self::__get('webleryBasePath') . confGalleryBasePath); //Directory where weblery albums are located
-		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') {
-			self::__set('initGalleryBasePath',confGalleryBasePath); //Directory where weblery.php is located
-			self::__set('albumCachePath','assets/album_cache/'); //Directory where weblery album images are created and stored
+	function weblery() {
+		$this->__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
+		$this->__set('galleryBasePath',$this->__get('webleryBasePath') . confGalleryBasePath); //Directory where weblery albums are located
+
+		if (baseName($_SERVER['SCRIPT_NAME']) == 'webleryphp4.php') {
+			$this->__set('initGalleryBasePath',confGalleryBasePath); //Directory where weblery.php is located
+			$this->__set('albumCachePath','assets/album_cache/'); //Directory where weblery album images are created and stored
 		} else {
-			self::__set('initGalleryBasePath',self::__get('galleryBasePath')); //Directory where weblery.php is located
-			self::__set('albumCachePath',self::__get('webleryBasePath') . 'assets/album_cache/'); //Directory where weblery album images are created and stored
+			$this->__set('initGalleryBasePath',$this->__get('galleryBasePath')); //Directory where weblery.php is located
+			$this->__set('albumCachePath',$this->__get('webleryBasePath') . 'assets/album_cache/'); //Directory where weblery album images are created and stored
 		}
-		self::__set('imgBasePath',self::__get('webleryBasePath') . 'assets/img/'); //Directory where weblery images is located
-		self::__set('layoutFile',self::__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
-		self::__set('baseStartPage',confBaseStartPage);
-		self::__set('defaultThumbWidth',confDefaultThumbWidth);
-		self::__set('defaultThumbHeight',confDefaultThumbHeight);
-		self::__set('mainImageSize',confMainImageSize);
-		
-		$tempAlbumArray = self::getAlbumArray();
+
+		$this->__set('imgBasePath',$this->__get('webleryBasePath') . 'assets/img/'); //Directory where weblery images is located
+		$this->__set('layoutFile',$this->__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
+		$this->__set('baseStartPage',confBaseStartPage);
+		$this->__set('defaultThumbWidth',confDefaultThumbWidth);
+		$this->__set('defaultThumbHeight',confDefaultThumbHeight);
+		$this->__set('mainImageSize',confMainImageSize);
+
+		$tempAlbumArray = $this->getAlbumArray();
 		if (count($tempAlbumArray)) {
 			if (isset($_GET['selectedAlbum']) && in_array($_GET['selectedAlbum'],$tempAlbumArray) && strlen($_GET['selectedAlbum']) > 0) {
-				self::__set('selectedAlbum',$_GET['selectedAlbum']);
+				$this->__set('selectedAlbum',$_GET['selectedAlbum']);
 			} else {
-				self::__set('selectedAlbum',$tempAlbumArray[0]);
+				$this->__set('selectedAlbum',$tempAlbumArray[0]);
 			}
 			if (isset($_GET['start']) && strlen($_GET['start']) > 0) {
-				self::__set('start',$_GET['start']);
+				$this->__set('start',$_GET['start']);
 			} else {
-				self::__set('start',0);
+				$this->__set('start',0);
 			}
-			self::__set('selectedAlbumPath',self::__get('initGalleryBasePath').self::__get('selectedAlbum')."/");
-			self::__set('selectedAlbumCachePath',self::__get('albumCachePath').self::__get('selectedAlbum')."/");
+			$this->__set('selectedAlbumPath',$this->__get('initGalleryBasePath').$this->__get('selectedAlbum')."/");
+			$this->__set('selectedAlbumCachePath',$this->__get('albumCachePath').$this->__get('selectedAlbum')."/");
 			
-			self::cleanAlbumCache();
+			$this->cleanAlbumCache();
 			
-			if (self::isInitialized()) {
-				self::__set('stillInitializing',false);
+			if ($this->isInitialized()) {
+				$this->__set('stillInitializing',false);
 			} else {
-				self::__set('stillInitializing',true);
+				$this->__set('stillInitializing',true);
 				if (isset($_GET['step']) && strlen($_GET['step']) > 0 && is_numeric($_GET['step'])) {
-					self::__set('initStep',$_GET['step']);
+					$this->__set('initStep',$_GET['step']);
 				} else {
-					self::__set('initStep',0);
+					$this->__set('initStep',0);
 				}
-				self::initializeAlbum(self::__get('initStep'));
+				$this->initializeAlbum($this->__get('initStep'));
 			}
 		} else {
-			echo "No Albums detected in the Album directory<br>Please upload some albums to ", self::__get('galleryBasePath');
+			echo "No Albums detected in the Album directory<br>Please upload some albums to ", $this->__get('galleryBasePath');
 			exit;
 		}
 	} //End Constructor
 
 	// Getters and Setters
-	public function __set($key,$val) {
+	function __set($key,$val) {
 		$this->$key=$val;
 	}
-	public function __get($key) {
+	function __get($key) {
 		return $this->$key;
 	}
 
 	// Weblery Methods
 
-	public function cleanAlbumCache() {
-		if ((is_dir(self::__get('selectedAlbumCachePath')))) {
-			$tempDirectoryArray = self::getPhotoArray();
-			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+	function cleanAlbumCache() {
+		if ((is_dir($this->__get('selectedAlbumCachePath')))) {
+			$tempDirectoryArray = $this->getPhotoArray();
+			$albumCacheArray = $this->dirsearch($this->__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
 			$files = array();
 			foreach ($tempDirectoryArray as $currentImage) {
 				$tempThumb = "tn_" . md5($currentImage);
@@ -117,16 +119,16 @@ class weblery {
 			$filesToDelete = array_diff($albumCacheArray, $files);
 			
 			foreach ($filesToDelete as $fileToDelete) {
-				unlink(self::__get('selectedAlbumCachePath') . $fileToDelete);
+				unlink($this->__get('selectedAlbumCachePath') . $fileToDelete);
 			}
 		}
 	}
-	
-	public function isInitialized() {
+
+	function isInitialized() {
 		//Check if this album's cache directory exists
-		if ( (is_dir(self::__get('selectedAlbumCachePath'))) ) {
-			$tempDirectoryArray = self::getPhotoArray();
-			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+		if ( (is_dir($this->__get('selectedAlbumCachePath'))) ) {
+			$tempDirectoryArray = $this->getPhotoArray();
+			$albumCacheArray = $this->dirsearch($this->__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
 			if (count($albumCacheArray) == (3 * count($tempDirectoryArray))) {
 				return true;
 			//The count of cached images is smaller than the photo array
@@ -135,12 +137,12 @@ class weblery {
 		} else { return false; }
 	} // End isInitialized method
 
-	protected function initializeAlbum($currentStep) {
+	function initializeAlbum($currentStep) {
 		//Check to see if this album has a folder in the album_cache to place it's images.
 		//If it doesn't, then create it.
-		if ( !(is_dir(self::__get('selectedAlbumCachePath'))) ) {
-			mkdir(self::__get('selectedAlbumCachePath') , 0777) or
-				die("Failed to create directory. Please make sure that the " . self::__get('albumCachePath') . " is readable and writable by the web server");
+		if ( !(is_dir($this->__get('selectedAlbumCachePath'))) ) {
+			mkdir($this->__get('selectedAlbumCachePath') , 0777) or
+				die("Failed to create directory. Please make sure that the " . $this->__get('albumCachePath') . " is readable and writable by the web server");
 		} ?>
 		<style>
 		body {
@@ -154,17 +156,17 @@ class weblery {
 		
 		switch($currentStep) {
 			case 1 :
-				self::regenThumbs('320',self::__get('selectedAlbumCachePath'));
+				$this->regenThumbs('320',$this->__get('selectedAlbumCachePath'));
 				echo '<h2>Step', $currentStep, " of ", $numberOfSteps, ' Complete.</h2>';
 				$continueLinkText = "Generate 640 width images";
 				break;
 			case 2 :
-				self::regenThumbs('640',self::__get('selectedAlbumCachePath'));
+				$this->regenThumbs('640',$this->__get('selectedAlbumCachePath'));
 				echo '<h2>Step ', $currentStep, " of ", $numberOfSteps, ' Complete.</h2>';
 				$continueLinkText = "Generate thumbnail images";
 				break;
 			case 3 :
-				self::regenThumbs('',self::__get('selectedAlbumCachePath'));
+				$this->regenThumbs('',$this->__get('selectedAlbumCachePath'));
 				echo '<h2>Step ', $currentStep, " of ", $numberOfSteps, ' Complete.</h2>';
 				$continueLinkText = "View your new album";
 				break;
@@ -175,15 +177,15 @@ class weblery {
 		}
 		?>
 		
-		<div id="progressbar" style="display:none;"><img id="loading-img" src="<?php echo self::__get('webleryBasePath'); ?>assets/img/loading.gif" alt="Generating Images... (loading animation)" /></div>
+		<div id="progressbar" style="display:none;"><img id="loading-img" src="<?php echo $this->__get('webleryBasePath'); ?>assets/img/loading.gif" alt="Generating Images... (loading animation)" /></div>
 		<p id="redirect-text">This page will continue automatically in 5 seconds.</p>
 		<p id="explanation-text">If for some reason it does not continue, click the step link below.</p>
 		
 		<?php
 		if ($currentStep <= 2) {
-			echo '<p id="continue-link-paragraph">Step ', $nextStep, ': <a href="#null" id="continue-init-link" onClick="setPageLoading(\'', self::__get('selectedAlbum'), '\',\'', $nextStep, '\');">', $continueLinkText, '</a></p>';
+			echo '<p id="continue-link-paragraph">Step ', $nextStep, ': <a href="#null" id="continue-init-link" onClick="setPageLoading(\'', $this->__get('selectedAlbum'), '\',\'', $nextStep, '\');">', $continueLinkText, '</a></p>';
 		} else {
-			echo '<p id="continue-link-paragraph"><a href="#null" id="continue-init-link" onClick="window.location=\'', self::__get('baseStartPage'), '?selectedAlbum=', self::__get('selectedAlbum'), '\';">', $continueLinkText, '</a></p>';
+			echo '<p id="continue-link-paragraph"><a href="#null" id="continue-init-link" onClick="window.location=\'', $this->__get('baseStartPage'), '?selectedAlbum=', $this->__get('selectedAlbum'), '\';">', $continueLinkText, '</a></p>';
 		}
 		?>
 		<script type="text/javascript">
@@ -192,7 +194,7 @@ class weblery {
 				$("#explanation-text").html("Please do not use your browser's back or refresh buttons at this time.");
 				$("#redirect-text").html('');
 				$("#continue-link-paragraph").html("");
-				jQuery.get("<?php echo self::__get('webleryBasePath'); ?>weblery.php", { selectedAlbum : thisAlbum, step : thisStep },  function(data) { $("#weblery-content").html(data); });
+				jQuery.get("<?php echo $this->__get('webleryBasePath'); ?>webleryphp4.php", { selectedAlbum : thisAlbum, step : thisStep },  function(data) { $("#weblery-content").html(data); });
 			}
 		
 			window.setTimeout(function() { 
@@ -203,8 +205,8 @@ class weblery {
 	} // End initializeAlbum method
 
 	//Returns an array of the albums in the weblery
-	public function getAlbumArray() {
-		if ($galleryHandle = opendir(self::__get('initGalleryBasePath'))) {
+	function getAlbumArray() {
+		if ($galleryHandle = opendir($this->__get('initGalleryBasePath'))) {
 			$directoryArray = array();
 			while (false !== ($file = readdir($galleryHandle))) {
 		        if (!(preg_match("/^[._]/", $file))) {
@@ -221,13 +223,13 @@ class weblery {
 	} // End getAlbumArray method
 
 	//Returns a list of links for the albums in the weblery
-	public function getAlbumList() {
-		$tempDirectoryArray = self::getAlbumArray();
+	function getAlbumList() {
+		$tempDirectoryArray = $this->getAlbumArray();
 		$dirCount = 1;
 		$albumList = "";
 		foreach ($tempDirectoryArray as $dirKey => $dirVal) {
 			$selected = "";
-			$currentSelectedAlbum = self::__get('selectedAlbum');
+			$currentSelectedAlbum = $this->__get('selectedAlbum');
 			if (isset($currentSelectedAlbum) && $currentSelectedAlbum == $dirVal) {
 				$selected = " class=\"selected\"";
 			} else if ($dirCount == 1 && !isset($currentSelectedAlbum)) {
@@ -240,12 +242,12 @@ class weblery {
 	} // End getAlbumList method
 
 	//Returns an array of photos in an album
-	public function getPhotoArray() {
+	function getPhotoArray() {
 		//Find the photos in the selected album
-		$selectedAlbumPath = self::__get('selectedAlbumPath');
+		$selectedAlbumPath = $this->__get('selectedAlbumPath');
 		if ($albumHandle = opendir($selectedAlbumPath)) {
 			$albumArray = array();
-			$albumArray = self::dirsearch($selectedAlbumPath,'/[.](jpg|jpeg|png)$/i',0,0);
+			$albumArray = $this->dirsearch($selectedAlbumPath,'/[.](jpg|jpeg|png)$/i',0,0);
 		} else {
 			die("Error opening selected album directory");
 		}
@@ -254,9 +256,9 @@ class weblery {
 		return $albumArray;
 	} // End getPhotoArray method
 
-	public function getPhotoList() {
-		$tempPhotoArray = self::getPhotoArray();
-		$currentStart = self::__get('start');
+	function getPhotoList() {
+		$tempPhotoArray = $this->getPhotoArray();
+		$currentStart = $this->__get('start');
 
 		if (isset($currentStart) && is_numeric($currentStart)) {
 			$leftThumbStart = $currentStart;
@@ -272,10 +274,10 @@ class weblery {
 		$leftThumbList = "";
 		foreach ($tempPhotoArray as $albumKey => $albumVal) {
 			if ($albumCount >= $leftThumbStart && $albumCount <= $rightThumbEnd) {
-				$currentThumbPath = self::__get('selectedAlbumCachePath') . "tn_" . md5($albumVal);
-				$currentImagePath = self::__get('selectedAlbumCachePath') . self::__get('mainImageSize') . "_" . md5($albumVal);
-				$currentOriginalPath = self::__get('selectedAlbumPath') . $albumVal;
-				$previewImagePath = self::__get('selectedAlbumCachePath') . "320_" . md5($albumVal);
+				$currentThumbPath = $this->__get('selectedAlbumCachePath') . "tn_" . md5($albumVal);
+				$currentImagePath = $this->__get('selectedAlbumCachePath') . $this->__get('mainImageSize') . "_" . md5($albumVal);
+				$currentOriginalPath = $this->__get('selectedAlbumPath') . $albumVal;
+				$previewImagePath = $this->__get('selectedAlbumCachePath') . "320_" . md5($albumVal);
 			}
 			if ($albumCount >= $rightThumbStart && $albumCount <= $rightThumbEnd) {
 				$rightThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:48px;display:inline;border: 1px solid #727375;" alt="' . $albumVal . '" onclick="javascript:resetCurrentImage(\'' . $currentImagePath . '\', \'' . $currentOriginalPath . '\');setTimeout(\'hidePreviewImage();\', 350);" onmouseover="javascript:previewImage(\'' . $previewImagePath . '\');" /></li>' . "\n";
@@ -289,10 +291,10 @@ class weblery {
 		return $leftThumbList . "|" . $rightThumbList;
 	} // End getPhotoList method
 
-	public function displayWeblery() {
-		$currentAlbumArray = self::getPhotoArray();
-		$currentStart = self::__get('start');
-		$thumbList = split("\|", self::getPhotoList());
+	function displayWeblery() {
+		$currentAlbumArray = $this->getPhotoArray();
+		$currentStart = $this->__get('start');
+		$thumbList = split("\|", $this->getPhotoList());
 		$numberOfSets = ceil(count($currentAlbumArray)/16);
 
 		if (isset($currentStart) && is_numeric($currentStart)) {
@@ -305,13 +307,13 @@ class weblery {
 		<script type="text/javascript">
 			var thumbArray= new Array();
 			var originalArray= new Array();
-			var mainImageSize = "<?php echo self::__get('mainImageSize'); ?>";
+			var mainImageSize = "<?php echo $this->__get('mainImageSize'); ?>";
 			<?php
 			$thumbCount = 0;
 			foreach ($currentAlbumArray as $albumKey => $albumVal) {
-				$currentThumbPath = self::__get('selectedAlbumCachePath') . "tn_" . md5($albumVal);
-				$currentImagePath = self::__get('selectedAlbumCachePath') . self::__get('mainImageSize') . "_" . md5($albumVal);
-				$currentOriginalPath = self::__get('selectedAlbumPath') . $albumVal;
+				$currentThumbPath = $this->__get('selectedAlbumCachePath') . "tn_" . md5($albumVal);
+				$currentImagePath = $this->__get('selectedAlbumCachePath') . $this->__get('mainImageSize') . "_" . md5($albumVal);
+				$currentOriginalPath = $this->__get('selectedAlbumPath') . $albumVal;
 				echo "thumbArray[", $thumbCount, "] = '", $currentImagePath, "';\n";
 				echo "originalArray[", $thumbCount, "] = '", $currentOriginalPath, "';\n";
 				$thumbCount += 1;
@@ -323,15 +325,15 @@ class weblery {
 			}
 			?>
 		</script>
-		<?php require_once(self::__get('layoutFile')); ?>
+		<?php require_once($this->__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
 				if (arrayPosition == 0 && <?php echo $currentImageId; ?> != 0) {
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', self::__get('selectedAlbum');?>";
+					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum');?>";
 					return;
 				}
 				if (arrayPosition < <?php echo $currentImageId; ?>) {
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', self::__get('selectedAlbum'), '&start=';?>"+(<?php echo $currentImageId; ?>-16);
+					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum'), '&start=';?>"+(<?php echo $currentImageId; ?>-16);
 					return;
 				} else if (arrayPosition >= <?php echo $currentImageId+16; ?>) {
 					if (arrayPosition == <?php echo count($currentAlbumArray)-1; ?>) {
@@ -340,7 +342,7 @@ class weblery {
 						lastStartNumber = arrayPosition;
 					}
 					if ($("#next-image-link").attr("play") == "true") { playingSlideshow = "&play=1"; } else { playingSlideshow = ''; }
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', self::__get('selectedAlbum'), '&start=';?>"+(lastStartNumber)+playingSlideshow;
+					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum'), '&start=';?>"+(lastStartNumber)+playingSlideshow;
 					return;
 				} else {
 					resetCurrentImage(thumbArray[arrayPosition], originalArray[arrayPosition]);
@@ -348,8 +350,8 @@ class weblery {
 					if (prevArrayPosition < 0) { prevArrayPosition = thumbArray.length-1; }
 					nextArrayPosition = arrayPosition + 1;
 					if (nextArrayPosition >= thumbArray.length) { nextArrayPosition = 0; }
-					document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
-					document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
+					document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo $this->__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
+					document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo $this->__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
 				}
 			}
 			
@@ -365,8 +367,8 @@ class weblery {
 						if (nextArrayPosition >= thumbArray.length) { nextArrayPosition = 0; }
 					}
 				}
-				document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
-				document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
+				document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo $this->__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
+				document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo $this->__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
 			}
 			
 			function previewImage(imagePath) {
@@ -391,18 +393,18 @@ class weblery {
 
 	//Thumbnail Methods
 
-	public function regenThumbs($regenType, $currentAlbumCachePath) {
-		$currentAlbum = self::__get('selectedAlbum');
-		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') {
-			$currentBasePath = self::__get('initGalleryBasePath');
+	function regenThumbs($regenType, $currentAlbumCachePath) {
+		$currentAlbum = $this->__get('selectedAlbum');
+		if (baseName($_SERVER['SCRIPT_NAME']) == 'webleryphp4.php') {
+			$currentBasePath = $this->__get('initGalleryBasePath');
 		} else {
-			$currentBasePath = self::__get('galleryBasePath');
+			$currentBasePath = $this->__get('galleryBasePath');
 		}
 		
 		if (isset($currentAlbum) && strlen($currentAlbum)) {
 			$imagefolder=$currentBasePath.$currentAlbum."/";
 			$thumbsfolder=$currentAlbumCachePath;
-			$pics=self::dirsearch($imagefolder,'/[.](jpg|jpeg|png)$/i',0,0);
+			$pics=$this->dirsearch($imagefolder,'/[.](jpg|jpeg|png)$/i',0,0);
 			if ($pics[0]!="") {
 				foreach ($pics as $p) {
 					$currentImagePath = $imagefolder.$p;
@@ -411,19 +413,19 @@ class weblery {
 						case "320" :
 							$s320DestPath = $thumbsfolder."320_".md5($p);
 							if (!is_file($s320DestPath)) {
-								self::resizeImage($currentImagePath,$s320DestPath,320);
+								$this->resizeImage($currentImagePath,$s320DestPath,320);
 							}
 							break;
 						case "640" :
 							$s640DestPath = $thumbsfolder."640_".md5($p);
 							if (!is_file($s640DestPath)) {
-								self::resizeImage($currentImagePath,$s640DestPath,640);
+								$this->resizeImage($currentImagePath,$s640DestPath,640);
 							}
 							break;
 						default :
 							$thumbDestPath = $thumbsfolder."tn_".md5($p);
 							if (!is_file($thumbDestPath)) {
-								self::createthumb($currentImagePath,$thumbDestPath,self::__get('defaultThumbWidth'),self::__get('defaultThumbHeight'),1);
+								$this->createthumb($currentImagePath,$thumbDestPath,$this->__get('defaultThumbWidth'),$this->__get('defaultThumbHeight'),1);
 							}
 							$otherType = 'thumbnails';
 							break;
@@ -435,7 +437,7 @@ class weblery {
 	} // End Regen Thumbs Method
 
 	/*Filters out thumbnails*/
-	protected function ditchtn($arr,$thumbname) {
+	function ditchtn($arr,$thumbname) {
 		$tmparr = '';
 		foreach ($arr as $item)	{
 			if (!preg_match("/^".$thumbname."/",$item)){$tmparr[]=$item;}
@@ -444,7 +446,7 @@ class weblery {
 	}
 
 	/* Creates a resized image */
-	protected function createthumb($name,$filename,$new_w,$new_h,$forceSquare) {
+	function createthumb($name,$filename,$new_w,$new_h,$forceSquare) {
 		if (preg_match("/(.jpg|.jpeg)$/i",$name)){$src_img=imagecreatefromjpeg($name);}
 		if (preg_match("/(.png)$/i",$name)){$src_img=imagecreatefrompng($name);}
 		$old_x=imageSX($src_img);
@@ -484,7 +486,7 @@ class weblery {
 		}
 		$dst_img=ImageCreateTrueColor($thumb_w,$thumb_h);
 		imagecopyresampled($dst_img,$src_img,0,0,$cropX,$cropY,$thumb_w,$thumb_h,$old_x,$old_y); 
-		if (preg_match("/(.png)/",$name)) {
+		if (preg_match("/(.png)$/",$name)) {
 			imagepng($dst_img,$filename); 
 		} else {
 			imagejpeg($dst_img,$filename); 
@@ -493,7 +495,7 @@ class weblery {
 		imagedestroy($src_img); 
 	}
 
-	protected function resizeImage($name,$filename,$new_size) {
+	function resizeImage($name,$filename,$new_size) {
 		if (preg_match("/(.jpg|.jpeg)$/i",$name)){$src_img=imagecreatefromjpeg($name);}
 		if (preg_match("/(.png)$/i",$name)){$src_img=imagecreatefrompng($name);}
 		$old_x=imageSX($src_img);
@@ -535,8 +537,7 @@ class weblery {
 	 *   $level      current level                 - used by recursive calls
 	 *   $basedir    path prefix to matching files - used by recursive calls
 	 */
-	protected function dirsearch($dir,$filter='/.*/',$maxdepth=100,$mindepth=0,$level=0,$basedir='')
-	{
+	function dirsearch($dir,$filter='/.*/',$maxdepth=100,$mindepth=0,$level=0,$basedir='') {
 		// prevent excessive recursion
 		if ( $level >= 100 || $level > $maxdepth ) {
 			return array();
@@ -558,7 +559,7 @@ class weblery {
 
 			// if the file is a directory, recurse into it
 			if ( is_dir($dir.'/'.$file) ) {
-				foreach ( self::dirsearch($dir.'/'.$file, $filter, $maxdepth, $mindepth, $level+1,"$file/") as $f) {
+				foreach ( $this->dirsearch($dir.'/'.$file, $filter, $maxdepth, $mindepth, $level+1,"$file/") as $f) {
 					array_push($files,$f);
 				}
 			}

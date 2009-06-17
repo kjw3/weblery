@@ -16,16 +16,34 @@
 //Configuration Parameters are set in configuration.php
 //Please read over the documents in the documentation folder
 ?>
+
+<?php
+if (PHP_VERSION < 5) {
+	$albumList = $this->getAlbumList();
+	$selectedAlbum = $this->__get('selectedAlbum');
+	$selectedAlbumPath = $this->__get('selectedAlbumPath');
+	$imageBasePath = $this->__get('imgBasePath');
+	$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
+	$mainImageSize = $this->__get('mainImageSize');
+} else {
+	$albumList = self::getAlbumList();
+	$selectedAlbum = self::__get('selectedAlbum');
+	$selectedAlbumPath = self::__get('selectedAlbumPath');
+	$imageBasePath = self::__get('imgBasePath');
+	$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
+	$mainImageSize = self::__get('mainImageSize');
+}
+?>
 <div class="float-left-container">
 	<div style="width: 1000px;">
 		<ul class="float-left-container" style="list-style:none;padding-left:5px;padding-right:5px;" onmouseover="hidePreviewImage();">
 			<li style="font-weight: bold;border-bottom:1px solid black;">Albums</li>
-			<?php echo self::getAlbumList(); ?>
+			<?php echo $albumList; ?>
 		</ul>
 		<table class="float-left-container">
 			<tr>
 				<td valign="top" style="text-align:left;padding-top:1px;padding-left:1px; width:48px;">
-					<span id="previous-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="prev-image-link" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a></span>
+					<span id="previous-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="prev-image-link" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipBackward.png" alt="Previous Image" /></a></span>
 					<div class="thumbnail-container">
 						<ul>
 							<?php echo $thumbList[0]; ?>
@@ -44,9 +62,9 @@
 							}
 							if ($i == ($numberOfSets-1)) {
 								$lastStartNumber = $i+($i*15);
-								echo '<a href="?selectedAlbum=', urlencode(self::__get('selectedAlbum')), '&amp;start=', $i+($i*15), '"', $selectedStyle, '>[', ($i+($i*15))+1, '-', count($currentAlbumArray), ']</a> ';
+								echo '<a href="?selectedAlbum=', urlencode($selectedAlbum), '&amp;start=', $i+($i*15), '"', $selectedStyle, '>[', ($i+($i*15))+1, '-', count($currentAlbumArray), ']</a> ';
 							} else {
-								echo '<a href="?selectedAlbum=', urlencode(self::__get('selectedAlbum')), '&amp;start=', $i+($i*15), '"', $selectedStyle, '>[', ($i+($i*15))+1, '-', ($i+($i*15))+16, ']</a> ';
+								echo '<a href="?selectedAlbum=', urlencode($selectedAlbum), '&amp;start=', $i+($i*15), '"', $selectedStyle, '>[', ($i+($i*15))+1, '-', ($i+($i*15))+16, ']</a> ';
 							}
 						}
 					} else {
@@ -55,9 +73,9 @@
 					?>
 					
 					<div id="current-image" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;">
-						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo self::__get('selectedAlbumCachePath') . "320_" . md5($currentAlbumArray[0]); ?>" style="border: 4px solid #fff;<?php if (self::__get('mainImageSize') == "320") { echo " width: 160px;"; } ?>" alt="Preview Image" /></div>
-						<img id="current-image-img" src="<?php echo self::__get('selectedAlbumCachePath') . self::__get('mainImageSize') . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
-					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo self::__get('selectedAlbumPath') .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
+						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo $selectedAlbumCachePath . "320_" . md5($currentAlbumArray[0]); ?>" style="border: 4px solid #fff;<?php if ($mainImageSize == "320") { echo " width: 160px;"; } ?>" alt="Preview Image" /></div>
+						<img id="current-image-img" src="<?php echo $selectedAlbumCachePath . $mainImageSize . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
+					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
 					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
 						<div id="photo-detail">
 
@@ -66,12 +84,12 @@
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<a href="#null" id="photo-detail-link">Photo Details</a>
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="<?php echo self::__get('selectedAlbumPath') . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
+						<a href="<?php echo $selectedAlbumPath . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
 					</div>
 				</td>
 
 				<td valign="top" style="text-align:right;padding-top:1px;padding-right:1px; width:48px;">
-					<span id="next-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a></span>
+					<span id="next-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipForward.png" alt="Next Image" /></a></span>
 					<?php if (strlen($thumbList[1])) { ?>
 					<div class="thumbnail-container" style="text-align:right;">
 						<ul>
@@ -85,4 +103,4 @@
 		</table>
 	</div>
 </div>
-<div style="clear:both;"></div>
+<div style="clear:both;line-height:0;"></div>
