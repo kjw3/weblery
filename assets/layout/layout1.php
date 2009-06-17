@@ -17,23 +17,6 @@
 //Please read over the documents in the documentation folder
 ?>
 
-<?php
-if (PHP_VERSION < 5) {
-	$albumList = $this->getAlbumList();
-	$selectedAlbum = $this->__get('selectedAlbum');
-	$selectedAlbumPath = $this->__get('selectedAlbumPath');
-	$imageBasePath = $this->__get('imgBasePath');
-	$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
-	$mainImageSize = $this->__get('mainImageSize');
-} else {
-	$albumList = self::getAlbumList();
-	$selectedAlbum = self::__get('selectedAlbum');
-	$selectedAlbumPath = self::__get('selectedAlbumPath');
-	$imageBasePath = self::__get('imgBasePath');
-	$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
-	$mainImageSize = self::__get('mainImageSize');
-}
-?>
 <div class="float-left-container">
 	<div style="width: 1000px;">
 		<ul class="float-left-container" style="list-style:none;padding-left:5px;padding-right:5px;" onmouseover="hidePreviewImage();">
@@ -77,13 +60,9 @@ if (PHP_VERSION < 5) {
 						<img id="current-image-img" src="<?php echo $selectedAlbumCachePath . $mainImageSize . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
 					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
 					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
-						<div id="photo-detail">
-
-						</div>
-						<a href="#null" id="slideshow-link">Play</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="#null" id="photo-detail-link">Photo Details</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<div id="photo-detail"></div>
+						<a href="#null" id="slideshow-link" style="padding-right:20px;">Play</a>
+						<a href="#null" id="photo-detail-link" style="padding-right:20px;">Photo Details</a>
 						<a href="<?php echo $selectedAlbumPath . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
 					</div>
 				</td>

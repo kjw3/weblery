@@ -17,24 +17,6 @@
 //Please read over the documents in the documentation folder
 ?>
 
-<?php
-if (PHP_VERSION < 5) {
-	$albumList = $this->getAlbumList();
-	$selectedAlbum = $this->__get('selectedAlbum');
-	$selectedAlbumPath = $this->__get('selectedAlbumPath');
-	$imageBasePath = $this->__get('imgBasePath');
-	$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
-	$mainImageSize = $this->__get('mainImageSize');
-} else {
-	$albumList = self::getAlbumList();
-	$selectedAlbum = self::__get('selectedAlbum');
-	$selectedAlbumPath = self::__get('selectedAlbumPath');
-	$imageBasePath = self::__get('imgBasePath');
-	$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
-	$mainImageSize = self::__get('mainImageSize');
-}
-?>
-
 <div class="float-left-container">
 	<ul id="basictab-ul" class="basictab" style="margin-top:10px;" onmouseover="hidePreviewImage();">
 		<?php echo $albumList; ?>
@@ -44,7 +26,7 @@ if (PHP_VERSION < 5) {
 		<table style="width:100%;">
 			<tr>
 				<td valign="top" style="text-align:left;padding-top:1px;padding-left:1px; width:48px;">
-					<span id="previous-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="prev-image-link" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo $imgBasePath; ?>skipBackward.png" alt="Previous Image" /></a></span>
+					<span id="previous-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="prev-image-link" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipBackward.png" alt="Previous Image" /></a></span>
 					<div class="thumbnail-container">
 						<ul>
 							<?php echo $thumbList[0]; ?>
@@ -77,19 +59,15 @@ if (PHP_VERSION < 5) {
 						<img id="current-image-img" src="<?php echo $selectedAlbumCachePath . $mainImageSize . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
 					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath .  $currentAlbumArray[$currentImageId]; ?>" style="display:none;" alt="Current Image" /></div>
 					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
-						<div id="photo-detail">
-
-						</div>
-						<a href="#null" id="slideshow-link">Play</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="#null" id="photo-detail-link">Photo Details</a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<div id="photo-detail"></div>
+						<a href="#null" id="slideshow-link" style="padding-right:20px;">Play</a>
+						<a href="#null" id="photo-detail-link" style="padding-right:20px;">Photo Details</a>
 						<a href="<?php echo $selectedAlbumPath . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
 					</div>
 				</td>
 
 				<td valign="top" style="text-align:right;padding-top:1px;padding-right:1px; width:48px;">
-					<span id="next-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo $imgBasePath; ?>skipForward.png" alt="Next Image" /></a></span>
+					<span id="next-image-cell" onmouseover="javascript:hidePreviewImage();"><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipForward.png" alt="Next Image" /></a></span>
 					<?php if (strlen($thumbList[1])) { ?>
 					<div class="thumbnail-container" style="text-align:right;">
 						<ul>

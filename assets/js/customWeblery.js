@@ -231,10 +231,8 @@ jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse) {
 		j += 4;
 	}
   
-	imageObj = new Image();
-	imageObj.exif = true;
 	for(var i = 0; i < preloadArray.length; i++) {
-		imageObj.src=preloadArray[i];
+		jQuery("<img>").attr("src", preloadArray[i]);
 	}
 }
 // End Preloading Images
