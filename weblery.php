@@ -72,8 +72,9 @@ class weblery {
 			self::__set('selectedAlbumPath',self::__get('initGalleryBasePath').self::__get('selectedAlbum')."/");
 			self::__set('selectedAlbumCachePath',self::__get('albumCachePath').self::__get('selectedAlbum')."/");
 			
+			self::cleanAlbumCache();
+			
 			if (self::isInitialized()) {
-				//self::displayWeblery();
 				self::__set('stillInitializing',false);
 			} else {
 				self::__set('stillInitializing',true);
@@ -100,50 +101,38 @@ class weblery {
 
 	// Weblery Methods
 
-	//Returns an array of the albums in the weblery
-	public function getAlbumArray() {
-		if ($galleryHandle = opendir(self::__get('initGalleryBasePath'))) {
-			$directoryArray = array();
-			while (false !== ($file = readdir($galleryHandle))) {
-		        if (!(preg_match("/^[._]/", $file))) {
-					$directoryArray[] = $file;
-				}
-		    }
-			closedir($galleryHandle);
-		} else {
-			die("Error opening gallery directory");
-		}
-		sort($directoryArray);
-		
-		return $directoryArray;
-	} // End getAlbumArray method
-
-	//Returns a list of links for the albums in the weblery
-	public function getAlbumList() {
-		$tempDirectoryArray = self::getAlbumArray();
-		
-		$dirCount = 1;
-		$albumList = "";
-		foreach ($tempDirectoryArray as $dirKey => $dirVal) {
-			$selected = "";
-			$currentSelectedAlbum = self::__get('selectedAlbum');
-			if (isset($currentSelectedAlbum) && $currentSelectedAlbum == $dirVal) {
-				$selected = " class=\"selected\"";
-			} else if ($dirCount == 1 && !isset($currentSelectedAlbum)) {
-				$selected = " class=\"selected\"";
+	public function cleanAlbumCache() {
+		if ((is_dir(self::__get('selectedAlbumCachePath')))) {
+			$tempDirectoryArray = self::getPhotoArray();
+			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+			$files = array();
+			foreach ($tempDirectoryArray as $currentImage) {
+				$tempThumb = "tn_" . md5($currentImage);
+				$temp320 = "320_" . md5($currentImage);
+				$temp640 = "640_" . md5($currentImage);
+				if (in_array($tempThumb, $albumCacheArray)) { $files[] = $tempThumb; }
+				if (in_array($temp320, $albumCacheArray)) { $files[] = $temp320; }
+				if (in_array($temp640, $albumCacheArray)) { $files[] = $temp640; }
 			}
-			$albumList .= "<li" . $selected . "><a href=\"?selectedAlbum=" . $dirVal . "\">" . str_replace("_"," ",$dirVal) . "</a></li>\n";
-			$dirCount += 1;
+			$filesToDelete = array_diff($albumCacheArray, $files);
+			
+			foreach ($filesToDelete as $fileToDelete) {
+				unlink(self::__get('selectedAlbumCachePath') . $fileToDelete);
+			}
 		}
-		return $albumList;
-	} // End getAlbumList method
-
+	}
+	
 	public function isInitialized() {
-		if (file_exists(self::__get('selectedAlbumPath').'initialized')) {
-			return true;
-		} else {
-			return false;
-		}
+		//Check if this album's cache directory exists
+		if ( (is_dir(self::__get('selectedAlbumCachePath'))) ) {
+			$tempDirectoryArray = self::getPhotoArray();
+			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+			if (count($albumCacheArray) == (3 * count($tempDirectoryArray))) {
+				return true;
+			//The count of cached images is smaller than the photo array
+			} else { return false; }
+		//Cache directory doesn't exist
+		} else { return false; }
 	} // End isInitialized method
 
 	protected function initializeAlbum($currentStep) {
@@ -176,9 +165,6 @@ class weblery {
 				break;
 			case 3 :
 				self::regenThumbs('',self::__get('selectedAlbumCachePath'));
-				$fileHandle = fopen(self::__get('selectedAlbumPath').'initialized', 'w');
-				fwrite($fileHandle, 'album initialized');
-				fclose($fileHandle);
 				echo '<h2>Step ', $currentStep, " of ", $numberOfSteps, ' Complete.</h2>';
 				$continueLinkText = "View your new album";
 				break;
@@ -216,6 +202,43 @@ class weblery {
 	<?php
 	} // End initializeAlbum method
 
+	//Returns an array of the albums in the weblery
+	public function getAlbumArray() {
+		if ($galleryHandle = opendir(self::__get('initGalleryBasePath'))) {
+			$directoryArray = array();
+			while (false !== ($file = readdir($galleryHandle))) {
+		        if (!(preg_match("/^[._]/", $file))) {
+					$directoryArray[] = $file;
+				}
+		    }
+			closedir($galleryHandle);
+		} else {
+			die("Error opening gallery directory");
+		}
+		sort($directoryArray);
+		
+		return $directoryArray;
+	} // End getAlbumArray method
+
+	//Returns a list of links for the albums in the weblery
+	public function getAlbumList() {
+		$tempDirectoryArray = self::getAlbumArray();
+		$dirCount = 1;
+		$albumList = "";
+		foreach ($tempDirectoryArray as $dirKey => $dirVal) {
+			$selected = "";
+			$currentSelectedAlbum = self::__get('selectedAlbum');
+			if (isset($currentSelectedAlbum) && $currentSelectedAlbum == $dirVal) {
+				$selected = " class=\"selected\"";
+			} else if ($dirCount == 1 && !isset($currentSelectedAlbum)) {
+				$selected = " class=\"selected\"";
+			}
+			$albumList .= "<li" . $selected . "><a href=\"?selectedAlbum=" . $dirVal . "\">" . str_replace("_"," ",$dirVal) . "</a></li>\n";
+			$dirCount += 1;
+		}
+		return $albumList;
+	} // End getAlbumList method
+
 	//Returns an array of photos in an album
 	public function getPhotoArray() {
 		//Find the photos in the selected album
@@ -228,11 +251,6 @@ class weblery {
 		}
 		if (count($albumArray) <= 0) { die("There are no photos in the selected album"); }
 		rsort($albumArray);
-		/*
-		$albumArray = self::ditchtn($albumArray,"tn_");
-		$albumArray = self::ditchtn($albumArray,"640_");
-		$albumArray = self::ditchtn($albumArray,"320_");
-		*/
 		return $albumArray;
 	} // End getPhotoArray method
 
@@ -371,6 +389,8 @@ class weblery {
 <?php
 	} // End displayWeblery method
 
+	//Thumbnail Methods
+
 	public function regenThumbs($regenType, $currentAlbumCachePath) {
 		$currentAlbum = self::__get('selectedAlbum');
 		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') {
@@ -390,15 +410,21 @@ class weblery {
 					switch ($regenType) {
 						case "320" :
 							$s320DestPath = $thumbsfolder."320_".md5($p);
-							self::resizeImage($currentImagePath,$s320DestPath,320);
+							if (!is_file($s320DestPath)) {
+								self::resizeImage($currentImagePath,$s320DestPath,320);
+							}
 							break;
 						case "640" :
 							$s640DestPath = $thumbsfolder."640_".md5($p);
-							self::resizeImage($currentImagePath,$s640DestPath,640);
+							if (!is_file($s640DestPath)) {
+								self::resizeImage($currentImagePath,$s640DestPath,640);
+							}
 							break;
 						default :
 							$thumbDestPath = $thumbsfolder."tn_".md5($p);
-							self::createthumb($currentImagePath,$thumbDestPath,self::__get('defaultThumbWidth'),self::__get('defaultThumbHeight'),1);
+							if (!is_file($thumbDestPath)) {
+								self::createthumb($currentImagePath,$thumbDestPath,self::__get('defaultThumbWidth'),self::__get('defaultThumbHeight'),1);
+							}
 							$otherType = 'thumbnails';
 							break;
 					}
@@ -407,7 +433,6 @@ class weblery {
 			if (isset($otherType) && $otherType = 'thumbnails') { $regenType = $otherType; }
 		}
 	} // End Regen Thumbs Method
-	//Thumbnail Methods
 
 	/*Filters out thumbnails*/
 	protected function ditchtn($arr,$thumbname) {
@@ -417,7 +442,7 @@ class weblery {
 		}
 		return $tmparr;
 	}
-	
+
 	/* Creates a resized image */
 	protected function createthumb($name,$filename,$new_w,$new_h,$forceSquare) {
 		$system=explode(".",$name);
