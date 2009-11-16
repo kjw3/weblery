@@ -28,6 +28,7 @@ class weblery {
 	var $selectedAlbumCachePath = '';
 	var $start = 0;
 	var $selectedAlbum = '';
+	var $enablePreview = true;
 
 	function weblery() {
 		$this->__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
@@ -47,6 +48,7 @@ class weblery {
 		$this->__set('defaultThumbWidth',confDefaultThumbWidth);
 		$this->__set('defaultThumbHeight',confDefaultThumbHeight);
 		$this->__set('mainImageSize',confMainImageSize);
+		$this->__set('enablePreview',confEnablePreview);
 
 		$tempAlbumArray = $this->getAlbumArray();
 		if (count($tempAlbumArray)) {
@@ -121,6 +123,7 @@ class weblery {
 	} // End isInitialized method
 
 	function initializeAlbum($currentStep) {
+		$oldUmask = umask(0);
 		if ( !(is_dir($this->__get('selectedAlbumCachePath'))) ) {
 			mkdir($this->__get('selectedAlbumCachePath') , 0777) or
 				die("Failed to create directory. Please make sure that the " . $this->__get('albumCachePath') . " is readable and writable by the web server");
@@ -177,6 +180,9 @@ class weblery {
 			$(document).ready(function(){ $("#continue-init-link").click(); });
 		</script>
 	<?php
+
+		umask($oldUmask);
+
 	} // End initializeAlbum method
 
 	//Returns an array of the albums in the weblery
@@ -373,13 +379,13 @@ class weblery {
 			function showPreviewImage() {
 				document.getElementById('current-image-img').style.opacity = "0.4";
 				document.getElementById('current-image-img').style.filter = "alpha(opacity=40)";
-				document.getElementById('preview-image').style.display = "block";
+				$("#preview-image").show("slow");
 			}
 			
 			function hidePreviewImage() {
 				document.getElementById('current-image-img').style.opacity = "1";
 				document.getElementById('current-image-img').style.filter = "alpha(opacity=100)";
-				document.getElementById('preview-image').style.display = "none";
+				$("#preview-image").hide("slow");
 			}
 		</script>
 <?php

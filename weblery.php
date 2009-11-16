@@ -2,14 +2,15 @@
 //Author: Kevin Jones
 //Email: kevin.d.jones@gmail.com
 //Web Address: http://www.weblery.com/
-//Date Last Modified: 06/17/2009
+//Date Last Modified: 11/16/2009
 //Copyright: Kevin Jones 2009
-//License: ./documentation/License.txt
+//License: ./License.txt
+//Manual: ./manual.pdf
 //
 //Note: You should find no need to edit this file
 //
 //Configuration Parameters are set in configuration.php
-//Please read over the documents in the documentation folder
+//Please read over the manual.pdf file to learn about configuration settings
 ?>
 
 <div id="weblery-content">
@@ -26,12 +27,14 @@ class weblery {
 	protected static $baseStartPage = '';
 	protected static $albumCachePath = '';
 	protected static $selectedAlbumCachePath = '';
+	protected static $enablePreview = true;
 	public $start = 0;
 	public $selectedAlbum = '';
 
 	function __construct() {
 		self::__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
 		self::__set('galleryBasePath',self::__get('webleryBasePath') . confGalleryBasePath); //Directory where weblery albums are located
+		//Investigate why this is here...
 		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') {
 			self::__set('initGalleryBasePath',confGalleryBasePath);
 			self::__set('albumCachePath','assets/album_cache/'); //Directory where weblery album images are created and stored
@@ -45,6 +48,7 @@ class weblery {
 		self::__set('defaultThumbWidth',confDefaultThumbWidth);
 		self::__set('defaultThumbHeight',confDefaultThumbHeight);
 		self::__set('mainImageSize',confMainImageSize);
+		self::__set('enablePreview',confEnablePreview);
 
 		$tempAlbumArray = self::getAlbumArray();
 		if (count($tempAlbumArray)) {
@@ -93,12 +97,12 @@ class weblery {
 	public function cleanAlbumCache() {
 		if (is_dir(self::__get('selectedAlbumCachePath'))) {
 			$tempDirectoryArray = self::getPhotoArray();
-			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|'.(self::__get('mainImageSize')/2).'_|'.self::__get('mainImageSize').'_)/i',0,0);
 			$files = array();
 			foreach ($tempDirectoryArray as $currentImage) {
 				if (in_array("tn_" . md5($currentImage), $albumCacheArray)) { $files[] = "tn_" . md5($currentImage); }
-				if (in_array("320_" . md5($currentImage), $albumCacheArray)) { $files[] = "320_" . md5($currentImage); }
-				if (in_array("640_" . md5($currentImage), $albumCacheArray)) { $files[] = "640_" . md5($currentImage); }
+				if (in_array((self::__get('mainImageSize')/2)."_" . md5($currentImage), $albumCacheArray)) { $files[] = (self::__get('mainImageSize')/2)."_" . md5($currentImage); }
+				if (in_array(self::__get('mainImageSize')."_" . md5($currentImage), $albumCacheArray)) { $files[] = self::__get('mainImageSize')."_" . md5($currentImage); }
 			}
 			$filesToDelete = array_diff($albumCacheArray, $files);
 
@@ -106,12 +110,13 @@ class weblery {
 				unlink(self::__get('selectedAlbumCachePath') . $fileToDelete);
 			}
 		}
+
 	}
 
 	public function isInitialized() {
 		if (is_dir(self::__get('selectedAlbumCachePath'))) {
 			$tempDirectoryArray = self::getPhotoArray();
-			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|'.(self::__get('mainImageSize')/2).'_|'.self::__get('mainImageSize').'_)/i',0,0);
 			if (count($albumCacheArray) == (3 * count($tempDirectoryArray))) {
 				return true;
 			} else { return false; } //Not enough images in the cache folder
@@ -119,6 +124,7 @@ class weblery {
 	} // End isInitialized method
 
 	protected function initializeAlbum($currentStep) {
+		$oldUmask = umask(0);
 		if ( !(is_dir(self::__get('selectedAlbumCachePath'))) ) {
 			mkdir(self::__get('selectedAlbumCachePath') , 0777) or
 				die("Failed to create directory. Please make sure that the " . self::__get('albumCachePath') . " is readable and writable by the web server");
@@ -132,12 +138,12 @@ class weblery {
 
 		switch($currentStep) {
 			case 1 :
-				self::regenThumbs('320',self::__get('selectedAlbumCachePath'));
+				self::regenThumbs((self::__get('mainImageSize')/2),self::__get('selectedAlbumCachePath'));
 				echo '<h2 id="h2-status" style="font-size:small;">Step', $currentStep, " of ", $numberOfSteps, ' Complete</h2>';
-				$continueLinkText = "Generate 640 width images";
+				$continueLinkText = "Generate ".self::__get('mainImageSize')." width images";
 				break;
 			case 2 :
-				self::regenThumbs('640',self::__get('selectedAlbumCachePath'));
+				self::regenThumbs(self::__get('mainImageSize'),self::__get('selectedAlbumCachePath'));
 				echo '<h2 id="h2-status" style="font-size:small;">Step ', $currentStep, " of ", $numberOfSteps, ' Complete</h2>';
 				$continueLinkText = "Generate thumbnail images";
 				break;
@@ -148,7 +154,7 @@ class weblery {
 				break;
 			default :
 				echo '<h2 id="h2-status" style="font-size:small;">This album first needs to be initialized</h2>';
-				$continueLinkText = "Generate 320 width images";
+				$continueLinkText = "Generate ".(self::__get('mainImageSize')/2)." width images";
 				break;
 		} ?>
 			
@@ -175,6 +181,9 @@ class weblery {
 			$(document).ready(function(){ $("#continue-init-link").click(); });
 		</script>
 	<?php
+
+		umask($oldUmask);
+
 	} // End initializeAlbum method
 
 	//Returns an array of the albums in the weblery
@@ -252,7 +261,7 @@ class weblery {
 				$currentThumbPath = self::__get('selectedAlbumCachePath') . "tn_" . md5($albumVal);
 				$currentImagePath = self::__get('selectedAlbumCachePath') . self::__get('mainImageSize') . "_" . md5($albumVal);
 				$currentOriginalPath = self::__get('selectedAlbumPath') . $albumVal;
-				$previewImagePath = self::__get('selectedAlbumCachePath') . "320_" . md5($albumVal);
+				$previewImagePath = self::__get('selectedAlbumCachePath') . (self::__get('mainImageSize')/2) . "_" . md5($albumVal);
 			}
 			if ($albumCount >= $rightThumbStart && $albumCount <= $rightThumbEnd) {
 				$rightThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:48px;display:inline;border: 1px solid #727375;" alt="' . $albumVal . '" onclick="javascript:resetCurrentImage(\'' . $currentImagePath . '\', \'' . $currentOriginalPath . '\');setTimeout(\'hidePreviewImage();\', 350);" onmouseover="javascript:previewImage(\'' . $previewImagePath . '\');" /></li>' . "\n";
@@ -371,13 +380,13 @@ class weblery {
 			function showPreviewImage() {
 				document.getElementById('current-image-img').style.opacity = "0.4";
 				document.getElementById('current-image-img').style.filter = "alpha(opacity=40)";
-				document.getElementById('preview-image').style.display = "block";
+				$("#preview-image").show("slow");
 			}
 			
 			function hidePreviewImage() {
 				document.getElementById('current-image-img').style.opacity = "1";
 				document.getElementById('current-image-img').style.filter = "alpha(opacity=100)";
-				document.getElementById('preview-image').style.display = "none";
+				$("#preview-image").hide("slow");
 			}
 		</script>
 <?php
@@ -404,16 +413,16 @@ class weblery {
 					$currentImagePath = $imagefolder.$p;
 					set_time_limit(20);
 					switch ($regenType) {
-						case "320" :
-							$s320DestPath = $thumbsfolder."320_".md5($p);
+						case (self::__get('mainImageSize')/2) :
+							$s320DestPath = $thumbsfolder.(self::__get('mainImageSize')/2)."_".md5($p);
 							if (!is_file($s320DestPath)) {
-								self::resizeImage($currentImagePath,$s320DestPath,320);
+								self::resizeImage($currentImagePath,$s320DestPath,(self::__get('mainImageSize')/2));
 							}
 							break;
-						case "640" :
-							$s640DestPath = $thumbsfolder."640_".md5($p);
+						case self::__get('mainImageSize') :
+							$s640DestPath = $thumbsfolder.self::__get('mainImageSize')."_".md5($p);
 							if (!is_file($s640DestPath)) {
-								self::resizeImage($currentImagePath,$s640DestPath,640);
+								self::resizeImage($currentImagePath,$s640DestPath,self::__get('mainImageSize'));
 							}
 							break;
 						default :

@@ -13,13 +13,16 @@ DEFINE('confBaseStartPage','demo.php');
 //Set the layout file to be used for the look and feel
 DEFINE('confLayoutFile','layout1.php');
 
-//Size of main image Either 320 or 640
-//DEFINE('confMainImageSize','320');
-DEFINE('confMainImageSize','640');
+//Width of main image in pixels
+DEFINE('confMainImageSize','480');
 
 //Set the default Width and Height of your thumbnails
 DEFINE('confDefaultThumbWidth','48');
 DEFINE('confDefaultThumbHeight','48');
+
+//Enable the rollover photo preview on the thumbnails
+//true turns the preview on, false turns it off
+DEFINE('confEnablePreview',true);
 
 /*************** End Configuration Parameters ******************/
 ?>
