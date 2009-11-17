@@ -35,6 +35,18 @@
 					</div>
 				</td>
 				<td valign="top" style="text-align:center;">
+					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
+						<div id="photo-detail"></div>
+						<a href="#null" id="slideshow-link" style="padding-right:20px;">Play</a>
+						<a href="#null" id="photo-detail-link" style="padding-right:20px;">Photo Details</a>
+						<a href="<?php echo $selectedAlbumPath . '/' . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
+					</div>
+					
+					<div id="current-image" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;">
+						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo $selectedAlbumCachePath . '/' . ($mainImageSize/2) . "_" . md5($currentAlbumArray[0]); ?>" style="border: 4px solid #fff;<?php if ($mainImageSize <= "320") { echo " width: 160px;"; } ?>" alt="Preview Image" /></div>
+						<img id="current-image-img" src="<?php echo $selectedAlbumCachePath . '/' . $mainImageSize . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
+					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath . '/' .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
+										
 					<?php
 					if ($numberOfSets > 1) {
 						for ($i=0;$i<$numberOfSets;$i++) {
@@ -50,21 +62,8 @@
 								echo '<a href="?selectedAlbum=', urlencode($selectedAlbum), '&amp;start=', $i+($i*15), '"', $selectedStyle, '>[', ($i+($i*15))+1, '-', ($i+($i*15))+16, ']</a> ';
 							}
 						}
-					} else {
-						$lastStartNumber = 0;
-					}
+					} else { $lastStartNumber = 0; }
 					?>
-					
-					<div id="current-image" onmouseover="javascript:hidePreviewImage();" style="overflow:hidden;">
-						<div id="preview-image" onmouseover="javascript:hidePreviewImage();"><img id="preview-image-img" src="<?php echo $selectedAlbumCachePath . "320_" . md5($currentAlbumArray[0]); ?>" style="border: 4px solid #fff;<?php if ($mainImageSize == "320") { echo " width: 160px;"; } ?>" alt="Preview Image" /></div>
-						<img id="current-image-img" src="<?php echo $selectedAlbumCachePath . $mainImageSize . "_" . md5($currentAlbumArray[$currentImageId]); ?>" style="margin:0 auto;border: 4px solid #fff;" alt="Current Image" /></div>
-					<div id="current-image-original" onmouseover="javascript:hidePreviewImage();" style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
-					<div id="current-image-extras" onmouseover="javascript:hidePreviewImage();">
-						<div id="photo-detail"></div>
-						<a href="#null" id="slideshow-link" style="padding-right:20px;">Play</a>
-						<a href="#null" id="photo-detail-link" style="padding-right:20px;">Photo Details</a>
-						<a href="<?php echo $selectedAlbumPath . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
-					</div>
 				</td>
 
 				<td valign="top" style="text-align:right;padding-top:1px;padding-right:1px; width:48px;">
