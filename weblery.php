@@ -722,6 +722,37 @@ function fastimagecopyresampled (&$dstImage, $srcImage, $dst_x, $dst_y, $src_x, 
   return true;
 }
 
+function setMemoryForImage( $filename ){
+    $imageInfo = getimagesize($filename);
+    $MB = 1048576;  // number of bytes in 1M
+    $K64 = 65536;    // number of bytes in 64K
+    $TWEAKFACTOR = 1.5;  // Or whatever works for you
+    $memoryNeeded = round( ( $imageInfo[0] * $imageInfo[1]
+                                           * $imageInfo['bits']
+                                           * $imageInfo['channels'] / 8
+                             + $K64
+                           ) * $TWEAKFACTOR
+                         );
+    //ini_get('memory_limit') only works if compiled with "--enable-memory-limit" also
+    //Default memory limit is 8MB so well stick with that. 
+    //To find out what yours is, view your php.ini file.
+    $memoryLimitMB = 8;
+	$memoryLimit = $memoryLimitMB * $MB;
+    if (function_exists('memory_get_usage') && 
+        memory_get_usage() + $memoryNeeded > $memoryLimit) 
+    {
+        $newLimit = $memoryLimitMB + ceil( ( memory_get_usage()
+                                            + $memoryNeeded
+                                            - $memoryLimit
+                                            ) / $MB
+                                        );
+        ini_set( 'memory_limit', $newLimit . 'M' );
+        return true;
+    }else
+        return false;
+    }
+}
+
 ?>
 
 <script type="text/javascript" src="<?php echo confWebleryBasePath; ?>assets/js/jquery-1.3.2.min.js"></script>
