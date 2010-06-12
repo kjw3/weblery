@@ -27,7 +27,7 @@ DEFINE('confDefaultThumbHeight','48');
 
 //Enable the rollover photo preview on the thumbnails
 //true turns the preview on, false turns it off
-DEFINE('confEnablePreview',true);
+DEFINE('confEnablePreview',false);
 
 //Enable the rollover photo preview on the thumbnails
 DEFINE('confEnablePreloadImages',false);
