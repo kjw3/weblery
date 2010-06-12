@@ -37,7 +37,10 @@
 				<td valign="top" style="text-align:center;">
 					<div id="current-image-extras"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>>
 						<div id="photo-detail"></div>
-						<a href="#null" id="slideshow-link" style="padding-right:20px;">Play</a>
+						<div id="playHtml" style="display:none;">Play</div>
+						<div id="pauseHtml" style="display:none;">Pause</div>
+						
+						<a href="#null" id="slideshow-link" style="padding-right:20px;" slideshowStatus="Play"><script type="text/javascript">$(document).ready(function() { $("#slideshow-link").html($("#playHtml").html()); });</script></a>
 						<a href="#null" id="photo-detail-link" style="padding-right:20px;">Photo Details</a>
 						<a href="<?php echo $selectedAlbumPath . '/' . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">View Original</a>
 					</div>

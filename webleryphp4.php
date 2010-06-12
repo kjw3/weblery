@@ -309,22 +309,13 @@ class weblery {
 			?>
 		</script>
 		<?php
-		if (PHP_VERSION < 5) {
-			$albumList = $this->getAlbumList();
-			$selectedAlbum = $this->__get('selectedAlbum');
-			$selectedAlbumPath = $this->__get('selectedAlbumPath');
-			$imageBasePath = $this->__get('imgBasePath');
-			$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
-			$mainImageSize = $this->__get('mainImageSize');
-		} else {
-			$albumList = self::getAlbumList();
-			$selectedAlbum = self::__get('selectedAlbum');
-			$selectedAlbumPath = self::__get('selectedAlbumPath');
-			$imageBasePath = self::__get('imgBasePath');
-			$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
-			$mainImageSize = self::__get('mainImageSize');
-		}
-
+		$albumList = $this->getAlbumList();
+		$selectedAlbum = $this->__get('selectedAlbum');
+		$selectedAlbumPath = $this->__get('selectedAlbumPath');
+		$imageBasePath = $this->__get('imgBasePath');
+		$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
+		$mainImageSize = $this->__get('mainImageSize');
+		
 		require_once($this->__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
@@ -337,7 +328,7 @@ class weblery {
 					return;
 				} else if (arrayPosition >= <?php echo $currentImageId+16; ?>) {
 					if (arrayPosition == <?php echo count($currentAlbumArray)-1; ?>) {
-						lastStartNumber = <?php echo $lastStartNumber; ?>;
+						lastStartNumber = <?php if (!isset($lastStartNumber)) { echo 0; } else { echo $lastStartNumber; } ?>;
 					} else {
 						lastStartNumber = arrayPosition;
 					}
@@ -591,6 +582,9 @@ if (!($weblery->__get('stillInitializing'))) {
 
 <?php if (!($weblery->__get('stillInitializing'))) { ?>
 <script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/jquery.exif.js"></script>
-<script type="text/javascript">$(document).ready(function(){ $.preloadImages(mainImageSize,thumbArray,originalArray); });</script>
-<?php } ?>
+
+<?php if (confEnablePreloadImages) { ?>
+	<script type="text/javascript">$(document).ready(function(){ $.preloadImages(mainImageSize,thumbArray,originalArray,<?php echo confEnablePreloadImages; ?>,<?php if (isset($_GET['start']) && is_numeric($_GET['start'])) { echo $_GET['start']; } else { echo 0; } ?>);});</script>
+<?php }
+} ?>
 </div>

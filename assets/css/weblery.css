@@ -41,17 +41,17 @@ A.content-link:link:hover, A.content-link:visited:hover {color: #09679A; font-si
 
 /*** Gallery Styles ***/
 #current-image {
-	position: relative;
-	margin: 2px;
-	padding: 2px;
-	background-color: #DCE7F1;
-	text-align: center;
+	position:relative;
+	margin:2px;
+	padding:2px;
+	background-color:#DCE7F1;
+	text-align:center;
 }
 
 #preview-image {
 	display: none;
 	position:absolute;
-	top: 2px;
+	top:2px;
 	left:0;
 	right:0;
 	text-align: center;

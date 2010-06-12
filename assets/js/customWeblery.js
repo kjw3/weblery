@@ -27,6 +27,7 @@ $(document).ready(function() {
 		closeOnEscape: true,
 		modal: true,
 		width: "350",
+		draggable: true,
 		position: "top",
 		title: "Photo Details",
 		buttons: { "close": function() {$(this).dialog('close');} }
@@ -47,17 +48,19 @@ $(document).ready(function() {
 	
 	$("#slideshow-link").click( function(e) {
 		e.preventDefault();
-		if ( $("#slideshow-link").html() == "Pause"  ) {
-			$("#slideshow-link").html("Play");
+		if ( $("#slideshow-link").attr("slideshowStatus") == "Pause"  ) {
+			$("#slideshow-link").attr("slideshowStatus", "Play");
+			$("#slideshow-link").html($("#playHtml").html());
 			clearTimeout(timerId);
 		} else {
-			$("#slideshow-link").html("Pause");
+			$("#slideshow-link").attr("slideshowStatus", "Pause");
+			$("#slideshow-link").html($("#pauseHtml").html());
 			timer();
 		}
 	});
 		
 	if ($_GET["play"] == 1) {
-		$("#slideshow-link").html("Pause");
+		$("#slideshow-link").html($("#pauseHtml").html());
 		timer();
 	}
 	
@@ -211,7 +214,7 @@ function getShutterSpeed(exifValue)
 }
 
 //Preloading Images for current photo set
-jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse,enablePreview) {
+jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse,enablePreview,start) {
 	preloadArray = new Array();
 	j=0;
 	switch(imageSize) {
@@ -223,7 +226,11 @@ jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse,enablePreview) 
 			break;
 	}
 	
-	for (i=0;i<thumbsToUse.length;i++) {
+	//Only load the images that will be displayed on this page.
+	finish = thumbsToUse.length;
+	if ((thumbsToUse.length - start) > 15) finish = start + 15;
+	
+	for (i=start;i<finish;i++) {
 		preloadArray[j] = thumbsToUse[i];
 		preloadArray[j+1] = thumbsToUse[i].replace(mainImageSize + "_", "tn_");
 		preloadArray[j+2] = origsToUse[i];

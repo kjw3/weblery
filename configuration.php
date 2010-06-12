@@ -11,7 +11,7 @@ DEFINE('confGalleryBasePath','albums');
 DEFINE('confBaseStartPage','demo.php');
 
 //Set the layout file to be used for the look and feel
-DEFINE('confLayoutFile','layout1.php');
+DEFINE('confLayoutFile','layout3.php');
 
 //Width of main image in pixels
 DEFINE('confMainImageSize','640');
@@ -29,8 +29,8 @@ DEFINE('confDefaultThumbHeight','48');
 //true turns the preview on, false turns it off
 DEFINE('confEnablePreview',false);
 
-//Enable the rollover photo preview on the thumbnails
-DEFINE('confEnablePreloadImages',false);
+//Enable preloading of all images for the current page
+DEFINE('confEnablePreloadImages',true);
 
 //If true, photos will be sorted in reverse order by file name
 DEFINE('confReverseSort',false);

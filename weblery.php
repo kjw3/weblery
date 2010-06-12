@@ -117,7 +117,7 @@ getMemoryInMb("right before init album call");
 			$files = array();
 			foreach ($tempDirectoryArray as $currentImage) {
 				if (in_array("tn_" . md5($currentImage), $albumCacheArray)) { $files[] = "tn_" . md5($currentImage); }
-				if (self::__get('enablePreview') && in_array((self::__get('mainImageSize')/2)."_" . md5($currentImage), $albumCacheArray)) { $files[] = (self::__get('mainImageSize')/2)."_" . md5($currentImage); }
+				if (in_array((self::__get('mainImageSize')/2)."_" . md5($currentImage), $albumCacheArray)) { $files[] = (self::__get('mainImageSize')/2)."_" . md5($currentImage); }
 				if (in_array(self::__get('mainImageSize')."_" . md5($currentImage), $albumCacheArray)) { $files[] = self::__get('mainImageSize')."_" . md5($currentImage); }
 			}
 			$filesToDelete = array_diff($albumCacheArray, $files);
@@ -158,13 +158,11 @@ getMemoryInMb("right before init album call");
 		if (is_dir(self::__get('selectedAlbumCachePath'))) {
 			$tempDirectoryArray = self::getPhotoArray();
 			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|'.(self::__get('mainImageSize')/2).'_|'.self::__get('mainImageSize').'_)/i',0,0);
-			$checkCount = 2;
-			if (self::__get('enablePreview')) $checkCount = 3;
+			$checkCount = 3;
 
-			if (count($albumCacheArray) == ($checkCount * count($tempDirectoryArray))) {
-				return true;
-			} else { return false; } //Not enough images in the cache folder
-		} else { return false; } //No cache folder exists for this album
+			if (count($albumCacheArray) == ($checkCount * count($tempDirectoryArray))) return true;
+			else return false; //Not enough images in the cache folder
+		} else return false; //No cache folder exists for this album
 	} // End isInitialized method
 
 	protected function initializeAlbum($currentStep) {
@@ -185,15 +183,10 @@ getMemoryInMb("Initialize Album after MkDir");
 
 		switch($currentStep) {
 			case 1 :
-				if (self::__get('enablePreview')) {
-					self::regenThumbs((self::__get('mainImageSize')/2),self::__get('selectedAlbumCachePath'));
-					echo '<h2 id="h2-status" style="font-size:small;">Step', $currentStep, " of ", $numberOfSteps, ' Complete</h2>';
-					$continueLinkText = "Generate ".self::__get('mainImageSize')." width images";
-					break;
-				} else {
-					$currentStep = 2;
-					$nextStep = $currentStep + 1;
-				}
+				self::regenThumbs((self::__get('mainImageSize')/2),self::__get('selectedAlbumCachePath'));
+				echo '<h2 id="h2-status" style="font-size:small;">Step', $currentStep, " of ", $numberOfSteps, ' Complete</h2>';
+				$continueLinkText = "Generate ".self::__get('mainImageSize')." width images";
+				break;
 			case 2 :
 				self::regenThumbs(self::__get('mainImageSize'),self::__get('selectedAlbumCachePath'));
 				echo '<h2 id="h2-status" style="font-size:small;">Step ', $currentStep, " of ", $numberOfSteps, ' Complete</h2>';
@@ -286,7 +279,7 @@ exit;
 			if ((isset($currentSelectedAlbum) && $currentSelectedAlbum == $dirVal) || ($dirCount == 1 && !isset($currentSelectedAlbum))) {
 				$selected = " class=\"selected\"";
 			}
-			$albumList .= "<li" . $selected . "><a href=\"?selectedAlbum=" . $dirVal . "\">" . str_replace("_"," ",$dirVal) . "</a></li>\n";
+			$albumList .= "<li" . $selected . " style=\"font-size:small;\"><a href=\"?selectedAlbum=" . $dirVal . "\">" . str_replace("_"," ",$dirVal) . "</a></li>\n";
 			$dirCount += 1;
 		}
 
@@ -360,7 +353,7 @@ exit;
 	public function displayWeblery() {
 		$currentAlbumArray = self::getPhotoArray();
 		$currentStart = self::__get('start');
-		$thumbList = split("\|", self::getPhotoList());
+		$thumbList = explode('|', self::getPhotoList());
 		$numberOfSets = ceil(count($currentAlbumArray)/16);
 
 		if (isset($currentStart) && is_numeric($currentStart)) {
@@ -392,22 +385,14 @@ exit;
 			?>
 		</script>
 		<?php
-		if (PHP_VERSION < 5) {
-			$albumList = $this->getAlbumList();
-			$selectedAlbum = $this->__get('selectedAlbum');
-			$selectedAlbumPath = $this->__get('selectedAlbumPath');
-			$imageBasePath = $this->__get('imgBasePath');
-			$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
-			$mainImageSize = $this->__get('mainImageSize');
-		} else {
-			$albumList = self::getAlbumList();
-			$selectedAlbum = self::__get('selectedAlbum');
-			$selectedAlbumPath = self::__get('selectedAlbumPath');
-			$imageBasePath = self::__get('imgBasePath');
-			$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
-			$mainImageSize = self::__get('mainImageSize');
-		}
-
+		
+		$albumList = self::getAlbumList();
+		$selectedAlbum = self::__get('selectedAlbum');
+		$selectedAlbumPath = self::__get('selectedAlbumPath');
+		$imageBasePath = self::__get('imgBasePath');
+		$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
+		$mainImageSize = self::__get('mainImageSize');
+		
 		require_once(self::__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
@@ -420,7 +405,7 @@ exit;
 					return;
 				} else if (arrayPosition >= <?php echo $currentImageId+16; ?>) {
 					if (arrayPosition == <?php echo count($currentAlbumArray)-1; ?>) {
-						lastStartNumber = <?php echo $lastStartNumber; ?>;
+						lastStartNumber = <?php if (!isset($lastStartNumber)) { echo 0; } else { echo $lastStartNumber; } ?>;
 					} else {
 						lastStartNumber = arrayPosition;
 					}
@@ -433,8 +418,8 @@ exit;
 					if (prevArrayPosition < 0) { prevArrayPosition = thumbArray.length-1; }
 					nextArrayPosition = arrayPosition + 1;
 					if (nextArrayPosition >= thumbArray.length) { nextArrayPosition = 0; }
-					document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
-					document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
+					document.getElementById('prev-image-link').onclick = function(){changeImage(prevArrayPosition);return false;};
+					document.getElementById('next-image-link').onclick = function(){changeImage(nextArrayPosition);return false;};
 				}
 			}
 			
@@ -450,8 +435,8 @@ exit;
 						if (nextArrayPosition >= thumbArray.length) { nextArrayPosition = 0; }
 					}
 				}
-				document.getElementById('previous-image-cell').innerHTML = '<a href="#null" id="prev-image-link" onclick="javascript:changeImage(' + prevArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipBackward.png" alt="Previous Image" /></a>';
-				document.getElementById('next-image-cell').innerHTML = '<a href="#null" id="next-image-link" onclick="javascript:changeImage(' + nextArrayPosition + ');return false;"><img src="<?php echo self::__get('imgBasePath'); ?>skipForward.png" alt="Next Image" /></a>';
+				document.getElementById('prev-image-link').onclick = function(){changeImage(prevArrayPosition);return false;};
+				document.getElementById('next-image-link').onclick = function(){changeImage(nextArrayPosition);return false;};
 			}
 			<?php if(self::__get('enablePreview')) { ?>
 			function previewImage(imagePath) {
@@ -754,8 +739,7 @@ function setMemoryForImage( $filename ){
     $memoryLimitMB = 8;
 	$memoryLimit = $memoryLimitMB * $MB;
     if (function_exists('memory_get_usage') && 
-        memory_get_usage() + $memoryNeeded > $memoryLimit) 
-    {
+        memory_get_usage() + $memoryNeeded > $memoryLimit) {
         $newLimit = $memoryLimitMB + ceil( ( memory_get_usage()
                                             + $memoryNeeded
                                             - $memoryLimit
@@ -763,11 +747,8 @@ function setMemoryForImage( $filename ){
                                         );
         ini_set( 'memory_limit', $newLimit . 'M' );
         return true;
-    }else
-        return false;
-    }
+    } else return false;
 }
-
 ?>
 
 <script type="text/javascript" src="<?php echo confWebleryBasePath; ?>assets/js/jquery-1.3.2.min.js"></script>
@@ -789,7 +770,7 @@ if (!($weblery->__get('stillInitializing'))) { ?>
 <?php if (!($weblery->__get('stillInitializing'))) { ?>
 <script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/jquery.exif.js"></script>
 	<?php if (confEnablePreloadImages) { ?>
-		<script type="text/javascript">$(document).ready(function(){ $.preloadImages(mainImageSize,thumbArray,originalArray,<?php echo $weblery->__get('enablePreview'); ?>);</script>
+		<script type="text/javascript">$(document).ready(function(){ $.preloadImages(mainImageSize,thumbArray,originalArray,<?php echo confEnablePreloadImages; ?>,<?php if (isset($_GET['start']) && is_numeric($_GET['start'])) { echo $_GET['start']; } else { echo 0; } ?>);});</script>
 	<?php }
 } ?>
 </div>
