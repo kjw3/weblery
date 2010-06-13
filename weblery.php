@@ -396,7 +396,7 @@ exit;
 		require_once(self::__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
-				if (arrayPosition == 0 && <?php echo $currentImageId; ?> != 0) {
+				if (arrayPosition == thumbArray.length || arrayPosition == 0 && <?php echo $currentImageId; ?> != 0) {
 					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', self::__get('selectedAlbum');?>";
 					return;
 				}
@@ -427,6 +427,9 @@ exit;
 				document.getElementById('current-image-img').src = imagePath;
 				document.getElementById('current-image-original-img').src = originalImagePath;
 				document.getElementById('view-original').href = originalImagePath;
+				
+				var prevArrayPosition = -1;
+				var nextArrayPosition = 1;
 				for(var i = 0; i < thumbArray.length; i++) {
 					if(thumbArray[i] === imagePath) {
 						prevArrayPosition = i - 1;

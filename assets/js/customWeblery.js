@@ -228,7 +228,7 @@ jQuery.preloadImages = function(imageSize,thumbsToUse,origsToUse,enablePreview,s
 	
 	//Only load the images that will be displayed on this page.
 	finish = thumbsToUse.length;
-	if ((thumbsToUse.length - start) > 15) finish = start + 15;
+	if ((thumbsToUse.length - start) > 16) finish = start + 16;
 	
 	for (i=start;i<finish;i++) {
 		preloadArray[j] = thumbsToUse[i];
