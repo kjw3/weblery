@@ -1,10 +1,13 @@
 <?php
 /************** Configuration Parameters ***********************/
 
-//The path to your weblery.php file
+//The relative url path to your weblery.php file
+//If the weblery.php file is sitting in your www root folder leave this variable as is
+//If not here is an example:
+//ex: http://www.mydomain.com/weblery/ set confWebleryBasePath to 'weblery/'
 DEFINE('confWebleryBasePath','');
 
-//The path to your album directory relative to your weblery.php file
+//The url path to your album directory relative to your weblery.php file
 DEFINE('confGalleryBasePath','albums');
 
 //Set the file name where the weblery class is included
