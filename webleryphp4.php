@@ -1,6 +1,6 @@
 <?php
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
 //Date Last Modified: 06/17/2009
 //Copyright: Kevin Jones 2009
@@ -62,7 +62,7 @@ class weblery {
 			} else {
 				$this->__set('start',0);
 			}
-			$this->__set('selectedAlbumPath',$this->__get('initGalleryBasePath').$this->__get('selectedAlbum')."/");
+			$this->__set('selectedAlbumPath',$this->__get('initGalleryBasePath').'/'.$this->__get('selectedAlbum')."/");
 			$this->__set('selectedAlbumCachePath',$this->__get('albumCachePath').$this->__get('selectedAlbum')."/");
 
 			$this->cleanAlbumCache();
@@ -109,6 +109,31 @@ class weblery {
 			foreach ($filesToDelete as $fileToDelete) {
 				unlink($this->__get('selectedAlbumCachePath') . $fileToDelete);
 			}
+		}
+
+		//Go through and remove any album cache directory for albums that no longer exist
+		$albumCacheDirectoryArray = array();
+		$albumCacheDirs = array();
+
+		if ($galleryHandle = opendir($this->__get('albumCachePath'))) {
+			while (false !== ($file = readdir($galleryHandle))) {
+		        if (!(preg_match("/^[._]/", $file))) {
+					$albumCacheDirectoryArray[] = $file;
+				}
+		    }
+			closedir($galleryHandle);
+		} else { die("Error opening album cache directory"); }
+
+		foreach ($albumCacheDirectoryArray as $currentAlbumCache) {
+
+			if (is_dir($this->__get('initGalleryBasePath').'/'.$currentAlbumCache)) $albumCacheDirs[] = $currentAlbumCache;
+
+		}
+
+		$albumCacheToDelete = array_diff($albumCacheDirectoryArray, $albumCacheDirs);
+
+		foreach ($albumCacheToDelete as $dirToDelete) {
+			$rmDirResult = $this->recursiveRemoveDirectory($this->__get('albumCachePath')."/".$dirToDelete);
 		}
 	}
 
@@ -277,7 +302,7 @@ class weblery {
 	function displayWeblery() {
 		$currentAlbumArray = $this->getPhotoArray();
 		$currentStart = $this->__get('start');
-		$thumbList = split("\|", $this->getPhotoList());
+		$thumbList = preg_split('/\|/', $this->getPhotoList());
 		$numberOfSets = ceil(count($currentAlbumArray)/16);
 
 		if (isset($currentStart) && is_numeric($currentStart)) {

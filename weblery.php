@@ -1,6 +1,6 @@
 <?php
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
 //Date Last Modified: 11/16/2009
 //Copyright: Kevin Jones 2009
@@ -11,20 +11,12 @@
 //
 //Configuration Parameters are set in configuration.php
 //Please read over the manual.pdf file to learn about configuration settings
-
-function getMemoryInMb($memoryTitle) {
-	//echo $memoryTitle, ": ", round((memory_get_usage()/1024)/1024, 2), "<br />";
-}
 ?>
 
 <div id="weblery-content">
 
 <?php
-getMemoryInMb("Before Configuration");
-
 include 'configuration.php'; //Get Weblery's Configuration
-
-getMemoryInMb("After Configuration");
 
 class weblery {
 	protected static $webleryBasePath = '';
@@ -36,11 +28,11 @@ class weblery {
 	protected static $albumCachePath = '';
 	protected static $selectedAlbumCachePath = '';
 	protected static $enablePreview = true;
+	protected static $enableWebleryLink = true;
 	public $start = 0;
 	public $selectedAlbum = '';
 
 	function __construct() {
-getMemoryInMb("Start Constructor");
 		self::__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
 		self::__set('galleryBasePath',self::__get('webleryBasePath') . confGalleryBasePath); //Directory where weblery albums are located
 		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') {
@@ -54,15 +46,12 @@ getMemoryInMb("Start Constructor");
 		self::__set('layoutFile',self::__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
 		self::__set('baseStartPage',confBaseStartPage);
 		self::__set('defaultThumbWidth',confDefaultThumbWidth);
-		self::__set('defaultThumbHeight',confDefaultThumbHeight);
+		self::__set('defaultThumbHeight',confDefaultThumbWidth);
 		self::__set('mainImageSize',confMainImageSize);
 		self::__set('enablePreview',confEnablePreview);
-
-getMemoryInMb("constructor after section 1");
+		self::__set('enableWebleryLink',confEnableWebleryLink);
 
 		$tempAlbumArray = self::getAlbumArray();
-
-getMemoryInMb("constructor after section 2");
 
 		if (count($tempAlbumArray)) {
 			if (isset($_GET['selectedAlbum']) && in_array($_GET['selectedAlbum'],$tempAlbumArray) && strlen($_GET['selectedAlbum']) > 0) {
@@ -80,16 +69,17 @@ getMemoryInMb("constructor after section 2");
 
 			self::cleanAlbumCache($tempAlbumArray);
 
-			if (self::isInitialized()) {
+			$stepCheck = isset($_GET['step']) && (strlen($_GET['step']) > 0 && is_numeric($_GET['step']));
+
+			if (self::isInitialized() && !$stepCheck) {
 				self::__set('stillInitializing',false);
 			} else {
 				self::__set('stillInitializing',true);
-				if (isset($_GET['step']) && strlen($_GET['step']) > 0 && is_numeric($_GET['step'])) {
+				if ($stepCheck) {
 					self::__set('initStep',$_GET['step']);
 				} else {
 					self::__set('initStep',0);
 				}
-getMemoryInMb("right before init album call");
 				self::initializeAlbum(self::__get('initStep'));
 			}
 		} else {
@@ -113,15 +103,14 @@ getMemoryInMb("right before init album call");
 		//Go through and remove any cached images that are no longer needed
 		if (is_dir(self::__get('selectedAlbumCachePath'))) {
 			$tempDirectoryArray = self::getPhotoArray();
-			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^(tn_|'.(self::__get('mainImageSize')/2).'_|'.self::__get('mainImageSize').'_)/i',0,0);
+			$albumCacheArray = self::dirsearch(self::__get('selectedAlbumCachePath'),'/^.+_/i',0,0);
 			$files = array();
 			foreach ($tempDirectoryArray as $currentImage) {
-				if (in_array("tn_" . md5($currentImage), $albumCacheArray)) { $files[] = "tn_" . md5($currentImage); }
-				if (in_array((self::__get('mainImageSize')/2)."_" . md5($currentImage), $albumCacheArray)) { $files[] = (self::__get('mainImageSize')/2)."_" . md5($currentImage); }
-				if (in_array(self::__get('mainImageSize')."_" . md5($currentImage), $albumCacheArray)) { $files[] = self::__get('mainImageSize')."_" . md5($currentImage); }
+				if (in_array("tn_" . md5($currentImage), $albumCacheArray)) $files[] = "tn_" . md5($currentImage);
+				if (in_array((self::__get('mainImageSize')/2)."_" . md5($currentImage), $albumCacheArray)) $files[] = (self::__get('mainImageSize')/2)."_" . md5($currentImage);
+				if (in_array(self::__get('mainImageSize')."_" . md5($currentImage), $albumCacheArray)) $files[] = self::__get('mainImageSize')."_" . md5($currentImage);
 			}
 			$filesToDelete = array_diff($albumCacheArray, $files);
-
 			foreach ($filesToDelete as $fileToDelete) {
 				unlink(self::__get('selectedAlbumCachePath') . '/' . $fileToDelete);
 			}
@@ -141,9 +130,7 @@ getMemoryInMb("right before init album call");
 		} else { die("Error opening album cache directory"); }
 
 		foreach ($albumCacheDirectoryArray as $currentAlbumCache) {
-
 			if (is_dir(self::__get('initGalleryBasePath').'/'.$currentAlbumCache)) $albumCacheDirs[] = $currentAlbumCache;
-
 		}
 
 		$albumCacheToDelete = array_diff($albumCacheDirectoryArray, $albumCacheDirs);
@@ -151,7 +138,6 @@ getMemoryInMb("right before init album call");
 		foreach ($albumCacheToDelete as $dirToDelete) {
 			$rmDirResult = self::recursiveRemoveDirectory(self::__get('albumCachePath')."/".$dirToDelete);
 		}
-
 	}
 
 	public function isInitialized() {
@@ -166,14 +152,11 @@ getMemoryInMb("right before init album call");
 	} // End isInitialized method
 
 	protected function initializeAlbum($currentStep) {
-getMemoryInMb("Start Initialize Album");
 		$oldUmask = umask(0);
-getMemoryInMb("Initialize Album after Umask");
 		if ( !(is_dir(self::__get('selectedAlbumCachePath'))) ) {
 			mkdir(self::__get('selectedAlbumCachePath') , 0777) or
-				die("Failed to create directory. Please make sure that the " . self::__get('albumCachePath') . " is readable and writable by the web server");
+				die("Failed to create directory. Please make sure that " . self::__get('albumCachePath') . " is readable and writable by the web server");
 		}
-getMemoryInMb("Initialize Album after MkDir");
 		echo '<style>#init-container{margin:10px;}</style>';
 		echo '<div id="init-container">';
 		echo '<h1>Album Initialization</h1>';
@@ -202,8 +185,6 @@ getMemoryInMb("Initialize Album after MkDir");
 				$continueLinkText = "Generate ".(self::__get('mainImageSize')/2)." width images";
 				break;
 		}
-
-getMemoryInMb("Initialize Album after Init Step");
 ?>
 			
 		<div id="progressbar" style="display:none;"><img id="loading-img" src="<?php echo self::__get('webleryBasePath'); ?>assets/img/loading.gif" alt="Generating Images... (loading animation)" /></div>
@@ -212,9 +193,9 @@ getMemoryInMb("Initialize Album after Init Step");
 		
 		<?php
 		if ($currentStep <= 2) {
-			echo '<p id="continue-link-paragraph">Step ', $nextStep, ': <a href="#null" id="continue-init-link" onClick="setPageLoading(\'', self::__get('selectedAlbum'), '\',\'', $nextStep, '\');">', $continueLinkText, '</a></p>';
+			echo '<p id="continue-link-paragraph">Step ', $nextStep, ': <a href="#null" id="continue-init-link" onClick="setPageLoading(\'', self::__get('selectedAlbum'), '\',\'', $nextStep, '\');return false;">', $continueLinkText, '</a></p>';
 		} else {
-			echo '<p id="continue-link-paragraph"><a href="#null" id="continue-init-link" onClick="window.location=\'', self::__get('baseStartPage'), '?selectedAlbum=', self::__get('selectedAlbum'), '\';">', $continueLinkText, '</a></p>';
+			echo '<p id="continue-link-paragraph"><a href="#null" id="continue-init-link" onClick="window.location=\'', self::__get('baseStartPage'), '?selectedAlbum=', self::__get('selectedAlbum'), '\';return false;">', $continueLinkText, '</a></p>';
 		}
 		?>
 		</div>
@@ -233,19 +214,16 @@ getMemoryInMb("Initialize Album after Init Step");
 				});
 			}
 		
-			$(document).ready(function(){ $("#continue-init-link").click(); });
-			
 			function handleSuccess(msg) {
 				$("#weblery-content").html(msg);
 				$("#continue-init-link").click();
 			}
+			
+			$(document).ready(function(){ $("#continue-init-link").click(); });
 		</script>
 		<?php
 
 		umask($oldUmask);
-
-getMemoryInMb("End Initialize Album");
-exit;
 
 	} // End initializeAlbum method
 
@@ -329,7 +307,7 @@ exit;
 				$previewImagePath = self::__get('selectedAlbumCachePath') . '/' . (self::__get('mainImageSize')/2) . "_" . md5($albumVal);
 			}
 			if ($albumCount >= $rightThumbStart && $albumCount <= $rightThumbEnd) {
-				$rightThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:48px;display:inline;border: 1px solid #727375;" ';
+				$rightThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:' . self::__get('defaultThumbWidth') . 'px;border: 1px solid #727375;" ';
 				$rightThumbList .= 'alt="' . $albumVal . '" onclick="javascript:resetCurrentImage(\'' . $currentImagePath . '\', \'' . $currentOriginalPath . '\');';
 				if(self::__get('enablePreview')) $rightThumbList .= 'setTimeout(\'hidePreviewImage();\', 350);';
 				$rightThumbList .= '"';
@@ -337,7 +315,7 @@ exit;
 				$rightThumbList .= ' /></li>' . "\n";
 			}
 			if ($albumCount >= $leftThumbStart && $albumCount <= $leftThumbEnd) {
-				$leftThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:48px;display:inline;border: 1px solid #727375;" ';
+				$leftThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:' . self::__get('defaultThumbWidth') . 'px;border: 1px solid #727375;" ';
 				$leftThumbList .= 'alt="' . $albumVal . '" onclick="javascript:resetCurrentImage(\'' . $currentImagePath . '\', \'' . $currentOriginalPath . '\');';
 				if(self::__get('enablePreview')) $leftThumbList .= 'setTimeout(\'hidePreviewImage();\', 350);';
 				$leftThumbList .= '"';
@@ -385,14 +363,15 @@ exit;
 			?>
 		</script>
 		<?php
-		
+
 		$albumList = self::getAlbumList();
 		$selectedAlbum = self::__get('selectedAlbum');
 		$selectedAlbumPath = self::__get('selectedAlbumPath');
 		$imageBasePath = self::__get('imgBasePath');
 		$selectedAlbumCachePath = self::__get('selectedAlbumCachePath');
 		$mainImageSize = self::__get('mainImageSize');
-		
+		$webleryLink = self::getWebleryLink();
+
 		require_once(self::__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
@@ -463,6 +442,11 @@ exit;
 <?php
 	} // End displayWeblery method
 
+	public function getWebleryLink() {
+		if (self::__get('enableWebleryLink'))
+			return '<tr><td colspan="3" style="text-align:center;"><a href="http://weblery.com" style="font-size:8pt;" title="Powered by Weblery" target="_blank">Powered by Weblery</a></td></tr>';
+	}
+
 	//Thumbnail Methods
 
 	public function regenThumbs($regenType, $currentAlbumCachePath) {
@@ -479,7 +463,6 @@ exit;
 			$thumbsfolder=$currentAlbumCachePath;
 			$pics=self::dirsearch($imagefolder,'/[.](jpg|jpeg|png)$/i',0,0);
 
-getMemoryInMb("before pic loop regenThumbs");
 			if ($pics[0]!="") {
 				foreach ($pics as $p) {
 					$currentImagePath = $imagefolder.'/'.$p;
@@ -507,7 +490,6 @@ getMemoryInMb("before pic loop regenThumbs");
 					}
 				}
 			}
-getMemoryInMb("after pic loop regenThumbs");
 
 			if (isset($otherType) && $otherType = 'thumbnails') { $regenType = $otherType; }
 		}
@@ -515,7 +497,6 @@ getMemoryInMb("after pic loop regenThumbs");
 
 	/* Creates a resized image */
 	protected function createthumb($name,$filename,$new_w,$new_h,$forceSquare) {
-getMemoryInMb("start Create Thumb");
 		if (preg_match("/(.jpg|.jpeg)$/i",$name)){$src_img=imagecreatefromjpeg($name);}
 		if (preg_match("/(.png)$/i",$name)){$src_img=imagecreatefrompng($name);}
 		$old_x=imageSX($src_img);
@@ -560,17 +541,13 @@ getMemoryInMb("start Create Thumb");
 		} else {
 			imagejpeg($dst_img,$filename); 
 		}
-getMemoryInMb("before destroy Create Thumb");
 		imagedestroy($dst_img);
 		imagedestroy($src_img);
-getMemoryInMb("after destroy Create Thumb");
 	} // End Create Thumb Method
 
 	protected function resizeImage($name,$filename,$new_size) {
-getMemoryInMb("start Resize Image");
 		if (preg_match("/(.jpg|.jpeg)$/i",$name)){$src_img=imagecreatefromjpeg($name);}
 		if (preg_match("/(.png)$/i",$name)){$src_img=imagecreatefrompng($name);}
-getMemoryInMb("after imagecreatefromjpeg Resize Image");
 		$old_x=imageSX($src_img);
 		$old_y=imageSY($src_img);
 		$cropX=0;
@@ -588,19 +565,15 @@ getMemoryInMb("after imagecreatefromjpeg Resize Image");
 			$thumb_w=$new_size;
 			$thumb_h=$old_y*($new_size/$old_x);
 		}
-getMemoryInMb("before ImageCreateTrueColor Resize Image");
 		$dst_img=ImageCreateTrueColor($thumb_w,$thumb_h);
-getMemoryInMb("before fastimagecopyresampled Resize Image");
 		fastimagecopyresampled($dst_img,$src_img,0,0,$cropX,$cropY,$thumb_w,$thumb_h,$old_x,$old_y); 
 		if (preg_match("/(.png)$/",$name)) {
 			imagepng($dst_img,$filename); 
 		} else {
 			imagejpeg($dst_img,$filename); 
 		}
-getMemoryInMb("before destroy Resize Image");
 		imagedestroy($dst_img);
 		imagedestroy($src_img);
-getMemoryInMb("after destroy Resize Image");
 	} // End Resize Image Method
 
 	/*
@@ -757,7 +730,6 @@ function setMemoryForImage( $filename ){
 <script type="text/javascript" src="<?php echo confWebleryBasePath; ?>assets/js/jquery-1.3.2.min.js"></script>
 
 <?php 
-getMemoryInMb("start Weblery");
 //Instantiate the gallery
 $weblery = new weblery();
 

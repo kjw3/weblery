@@ -21,6 +21,8 @@ p {
 
 img { border: none; }
 
+table tr td { padding:2px; }
+
 A:link 	{color: #68A1D6; font-weight: bold; text-decoration: none;}
 A:visited	{color: #68A1D6; font-weight: bold; text-decoration: none;}
 A:link:active, A:visited:active {color: #68A1D6; font-weight: bold; text-decoration: none;}
@@ -59,11 +61,13 @@ A.content-link:link:hover, A.content-link:visited:hover {color: #09679A; font-si
 }
 
 .thumbnail-container {
-	position: relative;
+	
 	z-index:100;
 }
 
 .thumbnail-container ul {
+	margin-left:2px;
+	margin-right:2px;
 	padding: 0;
 	list-style: none;
 }
@@ -71,8 +75,7 @@ A.content-link:link:hover, A.content-link:visited:hover {color: #09679A; font-si
 .thumbnail-container li {
 	display: block;
 	width: 48px;
-	height: 48px;
-	padding: 2px;
+	margin: 2px;
 }
 
 .thumbnailClear {

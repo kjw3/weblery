@@ -2,9 +2,15 @@
 /************** Configuration Parameters ***********************/
 
 //The relative url path to your weblery.php file
-//If the weblery.php file is sitting in your www root folder leave this variable as is
+//from the php file where weblery.php is being included
+//
+//If the weblery.php file is sitting in your www root folder leave this variable
+//set blank ( '' )
+//
 //If not here is an example:
-//ex: http://www.mydomain.com/weblery/ set confWebleryBasePath to 'weblery/'
+//weblery.php is sitting at http://www.mydomain.com/weblery/weblery.php
+//welbery.php is being included into http://www.mydomain.com/gallery.php
+//In this case set confWebleryBasePath to 'weblery/'
 DEFINE('confWebleryBasePath','');
 
 //The url path to your album directory relative to your weblery.php file
@@ -25,8 +31,10 @@ DEFINE('confMainImageSize','640');
 DEFINE('confImageQuality',3);
 
 //Set the default Width and Height of your thumbnails
+//Note: If you change this after you have initialized albums
+//You will need to delete the associated album folder from the
+//album_cache directory. Then you will need to reinitialize each album
 DEFINE('confDefaultThumbWidth','48');
-DEFINE('confDefaultThumbHeight','48');
 
 //Enable the rollover photo preview on the thumbnails
 //true turns the preview on, false turns it off
@@ -37,6 +45,10 @@ DEFINE('confEnablePreloadImages',true);
 
 //If true, photos will be sorted in reverse order by file name
 DEFINE('confReverseSort',false);
+
+//Enable the Powered by Weblery Link
+//True shows the link, False to remove the link
+DEFINE('confEnableWebleryLink',true);
 
 /*************** End Configuration Parameters ******************/
 ?>

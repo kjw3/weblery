@@ -1,6 +1,6 @@
 <?php
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
 //Date Last Modified: 06/17/2009
 //Copyright: Kevin Jones 2009

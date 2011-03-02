@@ -1,6 +1,6 @@
 <?php
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
 //Date Last Modified: 06/11/2009
 //Copyright: Kevin Jones 2009
@@ -25,7 +25,7 @@
 		</ul>
 		<table class="float-left-container">
 			<tr>
-				<td valign="top" style="text-align:left;padding-top:21px;padding-left:1px; width:48px;">
+				<td valign="top" style="text-align:left;padding-top:21px;padding-left:1px; width:<?php echo confDefaultThumbWidth; ?>px;">
 					
 					<div class="thumbnail-container">
 						<ul>
@@ -78,7 +78,7 @@
 					<div id="current-image-original"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?> style="position:absolute;top:-5000px;left:-5000px;overflow:hidden;"><img id="current-image-original-img" src="<?php echo $selectedAlbumPath . '/' .  $currentAlbumArray[$currentImageId]; ?>" style="visibility:hidden;" alt="Current Image" /></div>
 				</td>
 
-				<td valign="top" style="text-align:right;padding-top:21px;padding-right:1px; width:48px;">
+				<td valign="top" style="text-align:right;padding-top:21px;padding-right:1px; width:<?php echo confDefaultThumbWidth; ?>px;">
 					<?php if (strlen($thumbList[1])) { ?>
 					<div class="thumbnail-container" style="text-align:right;">
 						<ul>
@@ -89,6 +89,7 @@
 					<?php } ?>
 				</td>
 			</tr>
+			<?php echo $webleryLink;?>
 		</table>
 	</div>
 </div>

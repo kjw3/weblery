@@ -1,6 +1,6 @@
 <?php
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
 //Date Last Modified: 06/11/2009
 //Copyright: Kevin Jones 2009
@@ -25,7 +25,7 @@
 		</ul>
 		<table class="float-left-container">
 			<tr>
-				<td valign="top" style="text-align:left;padding-top:1px;padding-left:1px; width:48px;">
+				<td valign="top" style="text-align:left;padding-top:1px;padding-left:1px; width:<?php echo confDefaultThumbWidth; ?>px;">
 					<span id="previous-image-cell"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>><a href="#null" id="prev-image-link" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipBackward.png" alt="Previous Image" /></a></span>
 					<div class="thumbnail-container">
 						<ul>
@@ -71,7 +71,7 @@
 					?>
 				</td>
 
-				<td valign="top" style="text-align:right;padding-top:1px;padding-right:1px; width:48px;">
+				<td valign="top" style="text-align:right;padding-top:1px;padding-right:1px; width:<?php echo confDefaultThumbWidth; ?>px;">
 					<span id="next-image-cell"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo $imageBasePath; ?>skipForward.png" alt="Next Image" /></a></span>
 					<?php if (strlen($thumbList[1])) { ?>
 					<div class="thumbnail-container" style="text-align:right;">
@@ -83,6 +83,7 @@
 					<?php } ?>
 				</td>
 			</tr>
+			<?php echo $webleryLink;?>
 		</table>
 	</div>
 </div>
