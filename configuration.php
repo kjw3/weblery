@@ -25,16 +25,16 @@ DEFINE('confLayoutFile','layout3.php');
 //Width of main image in pixels
 DEFINE('confMainImageSize','640');
 
-//Set the image quality for the resized iamges and thumbs
-// 1 = lower quality faster speed
-// 5 = higher quality slower speed
-DEFINE('confImageQuality',3);
-
 //Set the default Width and Height of your thumbnails
 //Note: If you change this after you have initialized albums
 //You will need to delete the associated album folder from the
 //album_cache directory. Then you will need to reinitialize each album
 DEFINE('confDefaultThumbWidth','48');
+
+//Set the image quality for the resized images and thumbs
+// 1 = lower quality faster speed
+// 5 = higher quality slower speed
+DEFINE('confImageQuality',3);
 
 //Enable the rollover photo preview on the thumbnails
 //true turns the preview on, false turns it off

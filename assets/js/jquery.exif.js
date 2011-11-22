@@ -181,6 +181,7 @@ var BinaryAjax = (function() {
 					};
 				}
 			}
+			
 			oHTTP.open("GET", strURL, true);
 
 			if (oHTTP.overrideMimeType) oHTTP.overrideMimeType('text/plain; charset=x-user-defined');
@@ -538,9 +539,8 @@ function addEvent(oElement, strEvent, fncHandler)
 }
 
 
-function imageHasData(oImg) 
-{
-	return !!(oImg.exifdata);
+function imageHasData(oImg){
+	return (oImg.exifdata);
 }
 
 function getImageData(oImg, fncCallback) 
@@ -787,7 +787,7 @@ function readEXIFData(oFile, iStart, iLength) {
 EXIF.getData = function(oImg, fncCallback) 
 {
 	if (!oImg.complete) return false;
-	if (oImg.src != prevImage) { //!imageHasData(oImg)
+	if (prevImage == null || oImg.src != prevImage) { //!imageHasData(oImg)
 		getImageData(oImg, fncCallback);
 		prevImage = oImg.src;
 	} else {
@@ -856,7 +856,7 @@ function loadAllImages()
 }
 
 // automatically load exif data for all images with exif=true when doc is ready
-jQuery(document).ready(loadAllImages);
+//jQuery(document).ready(loadAllImages);
 
 // load data for images manually
 jQuery.fn.exifLoad = function(fncCallback) {

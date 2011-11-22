@@ -1,15 +1,13 @@
 /*
 //Author: Kevin Jones
-//Email: kevin.d.jones@gmail.com
+//Email: kevin@weblery.com
 //Web Address: http://www.weblery.com/
-//Date Last Modified: 06/11/2009
-//Copyright: Kevin Jones 2009
-//License: ./documentation/License.txt
+//Date Last Modified: 11/04/2011
+//Copyright: KJW3, LLC 2011
+//License: weblery/License.txt
+//Manual: weblery/manual.pdf
 //
 //Note: You should find no need to modify this file
-//
-//Configuration Parameters are set in configuration.php
-//Please read over the documents in the documentation folder
 */
 $(document).ready(function() {
 	var $_GET = {};
