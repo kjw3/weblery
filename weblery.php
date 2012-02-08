@@ -53,8 +53,7 @@ class weblery {
 		$tempAlbumArray = self::getAlbumArray();
 
 		if (count($tempAlbumArray)) {
-			reset($tempAlbumArray);
-			self::__set('selectedAlbum',$tempAlbumArray[key($tempAlbumArray)]);
+			self::__set('selectedAlbum',array_shift(array_values($tempAlbumArray)));
 
 			if (isset($_GET['selectedAlbum']) && in_array($_GET['selectedAlbum'],$tempAlbumArray) && strlen($_GET['selectedAlbum']) > 0) {
 				if(strpos($_GET['selectedAlbum'], "'") > -1) die("Please remove any apostrophes from the album name.");
