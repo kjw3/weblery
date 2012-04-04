@@ -1,18 +1,6 @@
 <?php
 /************** Configuration Parameters ***********************/
 
-//The relative url path to your weblery.php file
-//from the php file where weblery.php is being included
-//
-//If the weblery.php file is sitting in your www root folder leave this variable
-//set blank ( '' )
-//
-//If not here is an example:
-//weblery.php is sitting at http://www.mydomain.com/weblery/weblery.php
-//welbery.php is being included into http://www.mydomain.com/gallery.php
-//In this case set confWebleryBasePath to 'weblery/'
-DEFINE('confWebleryBasePath','');
-
 //The url path to your album directory relative to your weblery.php file
 DEFINE('confGalleryBasePath','albums');
 
@@ -44,7 +32,7 @@ DEFINE('confEnablePreview',false);
 DEFINE('confEnablePreloadImages',true);
 
 //If true, photos will be sorted in reverse order by file name
-DEFINE('confReverseSort',false);
+DEFINE('confReverseSort',true);
 
 //Enable the Powered by Weblery Link
 //True shows the link, False to remove the link

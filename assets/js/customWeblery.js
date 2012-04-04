@@ -10,13 +10,6 @@
 //Note: You should find no need to modify this file
 */
 $(document).ready(function() {
-	var $_GET = {};
-	document.location.search.replace(/\??(?:([^=]+)=([^&]*)&?)/g, function () {
-	    function decode(s) {
-	        return decodeURIComponent(s).replace(/\+/g, " ");
-	    }
-	    $_GET[decode(arguments[1])] = decode(arguments[2]);
-	});
 	
 	var $photoDetailDialog = $("#photo-detail").dialog({
 		bgiframe: true,
@@ -35,6 +28,7 @@ $(document).ready(function() {
 	var timerId = '';
 	function timer() {
 		timerId = window.setTimeout(function() {
+			
 			tempOnClick = $("#next-image-link").attr("onClick").toString();
 			if (tempOnClick.indexOf("start")) {
 				$("#next-image-link").attr("play", "true");
@@ -46,36 +40,56 @@ $(document).ready(function() {
 	
 	$("#slideshow-link").click( function(e) {
 		e.preventDefault();
+
 		if ( $("#slideshow-link").attr("slideshowStatus") == "Pause"  ) {
 			$("#slideshow-link").attr("slideshowStatus", "Play");
 			$("#slideshow-link").html($("#playHtml").html());
+			$("#next-image-link").attr("play", "false");
 			clearTimeout(timerId);
+			//This is a hack to clear all existing timeouts
+			var highestTimeoutId = setTimeout("");
+			for (var i = 0 ; i < highestTimeoutId ; i++) clearTimeout(i);
 		} else {
 			$("#slideshow-link").attr("slideshowStatus", "Pause");
 			$("#slideshow-link").html($("#pauseHtml").html());
 			timer();
 		}
+
 	});
-		
-	if ($_GET["play"] == 1) {
-		$("#slideshow-link").html($("#pauseHtml").html());
-		timer();
-	}
-	
+
 	// End Slideshow Functionality
 	
 	$("#photo-detail-link").click( function(e) {
 		e.preventDefault();
-		document.getElementById('photo-detail').innerHTML = 'Loading Photo Details...';
-		if($photoDetailDialog) { $photoDetailDialog.dialog("open"); }
+		
+		$('#photo-detail').html('Loading Photo Details...');
+
 		$("#current-image-original-img").exifLoadSingle('current-image-original-img', function() {
-			displayExif($("#current-image-original-img").exifPrettySingle('current-image-original-img'),$photoDetailDialog)
+			displayExif($("#current-image-original-img").exifPrettySingle('current-image-original-img'));
+		});
+		
+		if($photoDetailDialog) $photoDetailDialog.dialog("open");
+	});
+	
+	$(".setLink").click(function(e){
+		e.preventDefault();
+		$.ajax({
+		  url: $(this).attr('weblery'),
+		  data: {
+		  	selectedAlbum:$(this).attr('selectedAlbum'),
+		  	naked:$(this).attr('naked'),
+		  	start:$(this).attr('start')
+		  },
+		  success: function(data){
+		    $(".ui-dialog,#photo-detail").remove();
+		    $("#weblery-content").html(data);
+		  }
 		});
 	});
 });
 
 
-function displayExif(exifStrings, dialog) {
+function displayExif(exifStrings) {
 	var tempArray = new Array();
 	var currentItem = new Array();
 	var finalHtml = '<div style="float:left;width:50%;font-size:xx-small;font-weight:normal;text-align:left;padding-left:5px;">No photo details available</div>';
@@ -145,7 +159,9 @@ function displayExif(exifStrings, dialog) {
 				}
 		}
 	}
-	document.getElementById('photo-detail').innerHTML = finalHtml;
+
+	$('#photo-detail').html(finalHtml);
+
 }
 
 function getShutterSpeed(exifValue)

@@ -31,7 +31,7 @@
 				<div id="playHtml" style="display:none;">Play</div>
 				<div id="pauseHtml" style="display:none;">Pause</div>
 				
-				<a href="#null" id="slideshow-link" style="padding-right:10px;" slideshowStatus="Play"><script type="text/javascript">$(document).ready(function() { $("#slideshow-link").html($("#playHtml").html()); });</script></a>
+				<a href="#null" id="slideshow-link" style="margin:0 10px;" slideshowStatus="<?php echo $slideshowLinkText; ?>"><?php echo $slideshowLinkText; ?></a>
 				<a href="#null" id="photo-detail-link" style="padding-right:10px;">Photo Details</a>
 				<a href="<?php echo $selectedAlbumPath . '/' . $currentAlbumArray[$currentImageId]; ?>" id="view-original" style="padding-right:20px;" target="_blank">View Original</a>
 				<span id="next-image-cell" <?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>><a href="#null" id="next-image-link" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;" title="Next Photo"><img src="<?php echo $imageBasePath; ?>media-seek-forward.png" alt="Next Image" style="border:none;" /></a></span>

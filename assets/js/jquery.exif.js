@@ -224,8 +224,8 @@ var BinaryAjax = (function() {
 
 }());
 
-
-document.write(
+//Modified this for Weblery because document.write was causing a redirect issue.
+document.getElementById("vbscript").innerHTML =
 	"<script type='text/vbscript'>\r\n"
 	+ "Function IEBinary_getByteAt(strBinary, iOffset)\r\n"
 	+ "	IEBinary_getByteAt = AscB(MidB(strBinary,iOffset+1,1))\r\n"
@@ -234,8 +234,7 @@ document.write(
 	+ "	IEBinary_getLength = LenB(strBinary)\r\n"
 	+ "End Function\r\n"
 	+ "</script>\r\n"
-);
-
+;
 
 var EXIF = {};
 

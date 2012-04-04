@@ -14,35 +14,74 @@
 ?>
 
 <?php
+// As of v1.2, Weblery attempts to figure out it's own paths now
+$parsedUrl = parse_url($_SERVER['REQUEST_URI']);
+$webleryDir = preg_replace('/^\//', '', str_replace('\\', '/', str_replace(dirname(realpath(dirname(__FILE__))), '', dirname(__FILE__))));
+$includedFrom = preg_replace('/^\//', '', str_replace('\\', '/', dirname($_SERVER["SCRIPT_NAME"])));
+$webleryDir .= '/';
+$includedFrom .= '/';
+$webleryDirRelDocRoot = str_replace("//","/",'/'.$webleryDir);
+
+if ($webleryDir == $includedFrom || baseName($_SERVER['SCRIPT_NAME']) == 'webleryphp4.php' || $webleryDir == '/')
+	$webleryDir = '';
+
+if (strlen($webleryDir) > 0 && stripos($webleryDir,$includedFrom) === false)
+	$webleryDir =  dirname(realpath(dirname(__FILE__))) . '/' . $webleryDir;
+
 include 'configuration.php'; //Get Weblery's Configuration
 
 class weblery {
 	var $webleryBasePath = '';
+	var $webleryBasePathRelDocRoot = '';
 	var $galleryBasePath = '';
+	var $galleryWebPath = '';
+	var $pathToWebleryPHP = '';
 	var $initGalleryBasePath = '';
+	var $initGalleryWebPath = '';
 	var $imgBasePath = '';
 	var $stillInitializing = false;
 	var $baseStartPage = '';
 	var $albumCachePath = '';
+	var $albumCacheWebPath = '';
+	var $selectedAlbumPath = '';
+	var $selectedAlbumWebPath = '';
 	var $selectedAlbumCachePath = '';
+	var $selectedAlbumCacheWebPath = '';
+	var $layoutFile = '';
+	var $nakedLayoutFile = '';
+	var $defaultThumbWidth = '';
+	var $defaultThumbHeight = '';
+	var $mainImageSize = '';
 	var $enablePreview = true;
 	var $enableWebleryLink = true;
+	var $lastStartNumber = 0;
 	var $start = 0;
+	var $startImageId = 0;
 	var $selectedAlbum = '';
+	var $naked = false;
+	var $playing = false;
 
-	function weblery() {
-		$this->__set('webleryBasePath',confWebleryBasePath); //Directory where weblery.php is located
+	function weblery($webleryDir, $webleryDirRelDocRoot) {
+		$this->__set('webleryBasePath',$webleryDir); //Directory where weblery.php is located
+		$this->__set('webleryBasePathRelDocRoot',$webleryDirRelDocRoot);
 		$this->__set('galleryBasePath',$this->__get('webleryBasePath') . confGalleryBasePath); //Directory where weblery albums are located
-
-		$this->__set('initGalleryBasePath',$this->__get('galleryBasePath')); //Directory where weblery.php is located
+		$this->__set('galleryWebPath',$this->__get('webleryBasePathRelDocRoot') . confGalleryBasePath);
+		$this->__set('pathToWebleryPHP',$this->__get('webleryBasePathRelDocRoot') . 'webleryphp4.php');
+		$this->__set('initGalleryBasePath',$this->__get('galleryBasePath'));
+		$this->__set('initGalleryWebPath',$this->__get('galleryWebPath'));
 		$this->__set('albumCachePath',$this->__get('webleryBasePath') . 'assets/album_cache'); //Directory where weblery album images are created and stored
+		$this->__set('albumCacheWebPath',$this->__get('webleryBasePathRelDocRoot') . 'assets/album_cache');
+		$this->__set('imgBasePath',$this->__get('webleryBasePathRelDocRoot') . 'assets/img/');
+		$this->__set('layoutFile',$this->__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
+		$this->__set('nakedLayoutFile',$this->__get('webleryBasePath') . 'assets/layout/naked.php');
+
 		if (baseName($_SERVER['SCRIPT_NAME']) == 'webleryphp4.php') { //Needed for album initialization
 			$this->__set('initGalleryBasePath',confGalleryBasePath);
 			$this->__set('albumCachePath','assets/album_cache/');
+			$this->__set('layoutFile','assets/layout/'.confLayoutFile);
+			$this->__set('nakedLayoutFile','assets/layout/naked.php');
 		}
 
-		$this->__set('imgBasePath',$this->__get('webleryBasePath') . 'assets/img/'); //Directory where weblery images is located
-		$this->__set('layoutFile',$this->__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
 		$this->__set('baseStartPage',confBaseStartPage);
 		$this->__set('defaultThumbWidth',confDefaultThumbWidth);
 		$this->__set('defaultThumbHeight',confDefaultThumbWidth);
@@ -60,12 +99,31 @@ class weblery {
 				$this->__set('selectedAlbum',$_GET['selectedAlbum']);
 			}
 
-			$this->__set('start',0);
-			if (isset($_GET['start']) && strlen($_GET['start']) > 0)
+			if (isset($_GET['naked'])) {
+				//an empty but defined _GET['naked'] = true
+				if (strlen($_GET['naked']) <= 0) {
+					$this->__set('naked',true);
+				} elseif (strcmp($_GET['naked'],'false') == 0) {
+					//do nothing as naked is already false.
+				} elseif ($_GET['naked'] == true) {
+					$this->__set('naked',true);
+				}
+			}
+			
+			if (isset($_GET['play']) && $_GET['play'] != 0) 
+				$this->__set('playing',true);
+
+			if (isset($_GET['start']) && strlen($_GET['start']) > 0 && is_numeric($_GET['start'])) 
 				$this->__set('start',$_GET['start']);
+			
+			$this->__set('startImageId',$this->__get('start'));
+			if (isset($_GET['startImageId']) && strlen($_GET['startImageId']) > 0 && is_numeric($_GET['startImageId'])) 
+				$this->__set('startImageId',$_GET['startImageId']);
 
 			$this->__set('selectedAlbumPath',$this->__get('initGalleryBasePath').'/'.$this->__get('selectedAlbum'));
+			$this->__set('selectedAlbumWebPath',$this->__get('initGalleryWebPath').'/'.$this->__get('selectedAlbum'));
 			$this->__set('selectedAlbumCachePath',$this->__get('albumCachePath').'/'.$this->__get('selectedAlbum'));
+			$this->__set('selectedAlbumCacheWebPath',$this->__get('albumCacheWebPath').'/'.$this->__get('selectedAlbum'));
 
 			$this->cleanAlbumCache();
 
@@ -144,7 +202,7 @@ class weblery {
 	function isInitialized() {
 		if (is_dir($this->__get('selectedAlbumCachePath'))) {
 			$tempDirectoryArray = $this->getPhotoArray();
-			$albumCacheArray = $this->dirsearch($this->__get('selectedAlbumCachePath'),'/^(tn_|320_|640_)/i',0,0);
+			$albumCacheArray = $this->dirsearch($this->__get('selectedAlbumCachePath'),'/^(tn_|'.($this->__get('mainImageSize')/2).'_|'.$this->__get('mainImageSize').'_)/i',0,0);
 			$checkCount = 3;
 
 			if (count($albumCacheArray) == ($checkCount * count($tempDirectoryArray))) return true;
@@ -190,7 +248,7 @@ class weblery {
 				<h2 id="h2-status" style="font-size:small;">Step <?php echo $currentStep; ?> of <?php echo $numberOfSteps; ?> Complete</h2>
 			<?php } ?>
 			
-			<div id="progressbar" style="display:none;"><img id="loading-img" src="<?php echo $this->__get('webleryBasePath'); ?>assets/img/loading.gif" alt="Generating Images... (loading animation)" /></div>
+			<div id="progressbar" style="display:none;"><img id="loading-img" src="<?php echo $this->__get('webleryBasePathRelDocRoot'); ?>assets/img/loading.gif" alt="Generating Images... (loading animation)" /></div>
 			<p id="redirect-text">This page will continue automatically.</p>
 			<p id="explanation-text">If for some reason it does not, click the link below.</p>
 			
@@ -211,7 +269,7 @@ class weblery {
 				$("#h2-status,#redirect-text,#continue-link-paragraph").html('');
 				$.ajax({
 					type: "GET",
-					url: "<?php echo $this->__get('webleryBasePath'); ?>webleryphp4.php",
+					url: "<?php echo $this->__get('pathToWebleryPHP'); ?>",
 					cache: false,
 					data: "selectedAlbum="+thisAlbum+"&step="+thisStep,
 					success: function(msg){
@@ -311,10 +369,10 @@ class weblery {
 		foreach ($tempPhotoArray as $albumKey => $albumVal) {
 			$fileExtension = pathinfo($albumVal, PATHINFO_EXTENSION);
 			if ($albumCount >= $leftThumbStart && $albumCount <= $rightThumbEnd) {
-				$currentThumbPath = $this->__get('selectedAlbumCachePath') . '/' . "tn_" . md5($albumVal).'.'.$fileExtension;
-				$currentImagePath = $this->__get('selectedAlbumCachePath') . '/' . $this->__get('mainImageSize') . "_" . md5($albumVal).'.'.$fileExtension;
-				$currentOriginalPath = $this->__get('selectedAlbumPath') . '/' . $albumVal;
-				$previewImagePath = $this->__get('selectedAlbumCachePath') . '/' . ($this->__get('mainImageSize')/2) . "_" . md5($albumVal).'.'.$fileExtension;
+				$currentThumbPath = $this->__get('selectedAlbumCacheWebPath') . '/' . "tn_" . md5($albumVal).'.'.$fileExtension;
+				$currentImagePath = $this->__get('selectedAlbumCacheWebPath') . '/' . $this->__get('mainImageSize') . "_" . md5($albumVal).'.'.$fileExtension;
+				$currentOriginalPath = $this->__get('selectedAlbumWebPath') . '/' . $albumVal;
+				$previewImagePath = $this->__get('selectedAlbumCacheWebPath') . '/' . ($this->__get('mainImageSize')/2) . "_" . md5($albumVal).'.'.$fileExtension;
 			}
 			if ($albumCount >= $rightThumbStart && $albumCount <= $rightThumbEnd) {
 				$rightThumbList .= '<li><img src="' . $currentThumbPath . '" style="width:' . $this->__get('defaultThumbWidth') . 'px;border: 1px solid #727375;" ';
@@ -353,10 +411,13 @@ class weblery {
 				$urlStartNumber = $i+($i*15);
 				$startNumber = ($urlStartNumber)+1;
 
-				$setLink = '<a href="?selectedAlbum=' . urlencode($selectedAlbum) . '&amp;start=' . $urlStartNumber . '" style="' . $selectedStyle . 'padding-right:5px;">' . $startNumber . '-';
+				$naked = 0;
+				if ($this->__get("naked") == true) $naked = 1;
+
+				$setLink = '<a href="#' . $startNumber . '" class="setLink" weblery="' . $this->__get('pathToWebleryPHP') . '" naked="'.$naked.'" start="' . $urlStartNumber . '" selectedAlbum="' . urlencode($selectedAlbum) . '" style="' . $selectedStyle . 'padding-right:5px;">' . $startNumber . '-';
 
 				if ($i == ($numberOfSets-1)) {
-					$lastStartNumber = $urlStartNumber;
+					$this->__set('lastStartNumber',$urlStartNumber);
 					$setLink .= count($albumArray) . '</a> ';
 				} else {
 					$setLink .= ($urlStartNumber)+16 . '</a> ';
@@ -372,14 +433,12 @@ class weblery {
 	function displayWeblery() {
 		$currentAlbumArray = $this->getPhotoArray();
 		$currentStart = $this->__get('start');
+		$currentStartImageId = $this->__get('startImageId');
 		$thumbList = preg_split('/\|/', $this->getPhotoList());
-		
 
-		if (isset($currentStart) && is_numeric($currentStart)) {
-			$currentImageId = $currentStart;
-		} else {
-			$currentImageId = 0;
-		}
+		$currentImageId = 0;
+		if (is_numeric($currentStartImageId)) 
+			$currentImageId = $currentStartImageId;
 		?>
 		
 		<script type="text/javascript">
@@ -390,9 +449,9 @@ class weblery {
 			$thumbCount = 0;
 			foreach ($currentAlbumArray as $albumKey => $albumVal) {
 				$fileExtension = pathinfo($albumVal, PATHINFO_EXTENSION);
-				$currentThumbPath = $this->__get('selectedAlbumCachePath') . '/' . "tn_" . md5($albumVal).'.'.$fileExtension;
-				$currentImagePath = $this->__get('selectedAlbumCachePath') . '/' . $this->__get('mainImageSize') . "_" . md5($albumVal).'.'.$fileExtension;
-				$currentOriginalPath = $this->__get('selectedAlbumPath') . '/' . $albumVal;
+				$currentThumbPath = $this->__get('selectedAlbumCacheWebPath') . '/' . "tn_" . md5($albumVal).'.'.$fileExtension;
+				$currentImagePath = $this->__get('selectedAlbumCacheWebPath') . '/' . $this->__get('mainImageSize') . "_" . md5($albumVal).'.'.$fileExtension;
+				$currentOriginalPath = $this->__get('selectedAlbumWebPath') . '/' . $albumVal;
 				echo "thumbArray[", $thumbCount, "] = '", $currentImagePath, "';\n";
 				echo "originalArray[", $thumbCount, "] = '", $currentOriginalPath, "';\n";
 				$thumbCount += 1;
@@ -404,35 +463,90 @@ class weblery {
 			}
 			?>
 		</script>
-		<?php
 
+		<?php
 		$albumList = $this->getAlbumList();
 		$selectedAlbum = $this->__get('selectedAlbum');
-		$selectedAlbumPath = $this->__get('selectedAlbumPath');
+		$selectedAlbumPath = $this->__get('selectedAlbumWebPath');
 		$imageBasePath = $this->__get('imgBasePath');
-		$selectedAlbumCachePath = $this->__get('selectedAlbumCachePath');
+		$selectedAlbumCachePath = $this->__get('selectedAlbumCacheWebPath');
 		$mainImageSize = $this->__get('mainImageSize');
 		$setLinks = $this->getSetLinks($selectedAlbum,$currentAlbumArray,$currentImageId);
 		$webleryLink = $this->getWebleryLink();
+		$slideshowLinkText = "Play";
+		$slideshowLinkImg = "start"; 
+		if($this->__get('playing')) {
+			$slideshowLinkText = "Pause";
+			$slideshowLinkImg = "pause";
+		}
+		$layoutFileToUse = $this->__get('layoutFile');
+		if($this->__get('naked'))
+			$layoutFileToUse = $this->__get('nakedLayoutFile');
+		
+		require_once($layoutFileToUse);
+		?>
 
-		require_once($this->__get('layoutFile')); ?>
 		<script type="text/javascript">
 			function changeImage(arrayPosition) {
+				var recallWeblery = false;
+				var curNaked = 0;
+				<?php if ($this->__get("naked") == true) { ?> curNaked = 1; <?php } ?>
+
+				var curSelectedAlbum = '<?php echo $this->__get('selectedAlbum'); ?>';
+				var initStart = 0;
+				var curStart = 0;
+				var curStartImageId = 0;
+				var curPlay = 0;
+				var subtractor = 16;
+				var subtractorMax = thumbArray.length;
+				
 				if (arrayPosition == thumbArray.length || arrayPosition == 0 && <?php echo $currentImageId; ?> != 0) {
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum');?>";
-					return;
-				}
-				if (arrayPosition < <?php echo $currentImageId; ?>) {
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum'), '&start=';?>"+(<?php echo $currentImageId; ?>-16);
-					return;
-				} else if (arrayPosition >= <?php echo $currentImageId+16; ?>) {
+					recallWeblery = true;
+				} else if (arrayPosition < <?php echo $currentImageId; ?>) {
+					subtractor = <?php echo $currentImageId; ?> - 16;
+					if (subtractor > subtractorMax) subtractor = subtractorMax
+					
+					initStart = <?php echo $currentImageId; ?> - subtractor;
+					curStart = initStart;
+					curStartImageId = arrayPosition;
+
+					if (arrayPosition < initStart )
+						curStart -= 16;
+
+					if (initStart < 0) initStart = 0;
+					if (curStart < 0) curStart = 0;
+					if (arrayPosition == 0) curStartImageId = curStart;
+					if (curStart < initStart)
+						recallWeblery = true;
+				} else if (arrayPosition >= <?php echo $currentImageId + (16 - ceil($currentImageId % 16)); ?>) {
+					curStart = arrayPosition;
+					curStartImageId = curStart;
+
 					if (arrayPosition == <?php echo count($currentAlbumArray)-1; ?>) {
-						lastStartNumber = <?php if (!isset($lastStartNumber)) { echo 0; } else { echo $lastStartNumber; } ?>;
-					} else {
-						lastStartNumber = arrayPosition;
+						curStart = <?php if (strlen($this->__get('lastStartNumber')) <= 0) { echo 0; } else { echo $this->__get('lastStartNumber'); } ?>;
+						curStartImageId = thumbArray.length - 1;
 					}
-					if ($("#next-image-link").attr("play") == "true") { playingSlideshow = "&play=1"; } else { playingSlideshow = ''; }
-					window.location = "<?php echo $_SERVER['PHP_SELF'],'?selectedAlbum=', $this->__get('selectedAlbum'), '&start=';?>"+(lastStartNumber)+playingSlideshow;
+
+					recallWeblery = true;
+				}
+				
+				if (recallWeblery) {
+					if ($("#next-image-link").attr("play") == "true") curPlay = 1;
+					
+					$.ajax({
+					  url: "<?php echo $this->__get('pathToWebleryPHP'); ?>",
+					  data: {
+					  	selectedAlbum:curSelectedAlbum,
+					  	naked:curNaked,
+					  	start:curStart,
+					  	startImageId:curStartImageId,
+					  	play:curPlay
+					  },
+					  success: function(data){
+					    $(".ui-dialog,#photo-detail").remove();
+					    $("#weblery-content").html(data);
+					  }
+					});
 					return;
 				} else {
 					resetCurrentImage(thumbArray[arrayPosition], originalArray[arrayPosition]);
@@ -502,7 +616,7 @@ class weblery {
 		}
 
 		if (isset($currentAlbum) && strlen($currentAlbum)) {
-			$imagefolder=$currentBasePath.'/'.$currentAlbum."/";
+			$imagefolder=$currentBasePath.'/'.$currentAlbum;
 			$thumbsfolder=$currentAlbumCachePath;
 			$pics=$this->dirsearch($imagefolder,'/[.](jpg|jpeg|png)$/i',0,0);
 
@@ -585,8 +699,8 @@ class weblery {
 		} else {
 			imagejpeg($dst_img,$filename); 
 		}
-		imagedestroy($dst_img); 
-		imagedestroy($src_img); 
+		imagedestroy($dst_img);
+		imagedestroy($src_img);
 	} // End Create Thumb Method
 
 	function resizeImage($name,$filename,$new_size) {
@@ -769,21 +883,22 @@ function setMemoryForImage( $filename ){
         return true;
     } else return false;
 }
-?>
 
-<script type="text/javascript" src="<?php echo confWebleryBasePath; ?>assets/js/jquery-1.6.1.min.js"></script>
+//Load JQuery
+echo '<script type="text/javascript" src="', $webleryDirRelDocRoot, 'assets/js/jquery-1.6.1.min.js"></script>';
 
-<?php 
 //Instantiate the gallery
-$weblery = new weblery();
+$weblery = new weblery($webleryDir,$webleryDirRelDocRoot);
 
 if (!($weblery->__get('stillInitializing'))) { ?>
 
+	<link type="text/css"  rel="stylesheet" href="<?php echo $weblery->__get('webleryBasePathRelDocRoot'); ?>assets/js/jqueryUI/css/smoothness/jquery-ui-1.7.1.custom.css" />
+
 	<div id="weblery-content">	
 
-		<link type="text/css"  rel="stylesheet" href="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/jqueryUI/css/smoothness/jquery-ui-1.7.1.custom.css" />
-
 		<style type="text/css">
+			a { outline: none; }
+			
 			.clear { clear: both; }
 			
 			.float-left-container { float: left; }
@@ -812,12 +927,13 @@ if (!($weblery->__get('stillInitializing'))) { ?>
 	
 <?php } ?>
 
-<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/jqueryUI/js/jquery-ui-1.7.1.custom.min.js"></script>
-<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/customWeblery.js"></script>
+<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePathRelDocRoot'); ?>assets/js/jqueryUI/js/jquery-ui-1.7.1.custom.min.js"></script>
+<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePathRelDocRoot'); ?>assets/js/customWeblery.js"></script>
 
 <?php if (!($weblery->__get('stillInitializing'))) { ?>
-<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePath'); ?>assets/js/jquery.exif.js"></script>
+	<div id="vbscript"></div>
+	<script type="text/javascript" src="<?php echo $weblery->__get('webleryBasePathRelDocRoot'); ?>assets/js/jquery.exif.js"></script>
 	<?php if (confEnablePreloadImages) { ?>
-		<script type="text/javascript">$(document).ready(function(){ $.preloadImages(mainImageSize,thumbArray,originalArray,<?php echo confEnablePreloadImages; ?>,<?php if (isset($_GET['start']) && is_numeric($_GET['start'])) { echo $_GET['start']; } else { echo 0; } ?>);});</script>
+		<script type="text/javascript">$(document).ready(function(){$.preloadImages(mainImageSize,thumbArray,originalArray,<?php echo confEnablePreloadImages; ?>,<?php if (isset($_GET['start']) && is_numeric($_GET['start'])) { echo $_GET['start']; } else { echo 0; } ?>);});</script>
 	<?php }
 } ?>

@@ -50,6 +50,7 @@
 				<div id="photo-detail"></div>
 				<div id="playHtml" style="display:none;">Play</div>
 				<div id="pauseHtml" style="display:none;">Pause</div>
+				<a href="#null" id="slideshow-link" style="margin:0 10px;" slideshowStatus="<?php echo $slideshowLinkText; ?>"><?php echo $slideshowLinkText; ?></a>
 				<a href="#null" id="slideshow-link" style="padding-right:20px;" slideshowStatus="Play"><script type="text/javascript">$(document).ready(function() { $("#slideshow-link").html($("#playHtml").html()); });</script></a>
 				<a href="#null" id="photo-detail-link" style="padding-right:20px;">Details</a>
 				<a href="<?php echo $selectedAlbumPath . '/' . $currentAlbumArray[$currentImageId]; ?>" id="view-original" target="_blank">Original</a>

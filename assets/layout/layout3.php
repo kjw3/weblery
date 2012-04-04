@@ -30,7 +30,7 @@
 				<div id="pauseHtml" style="display:none;"><img src="<?php echo $imageBasePath; ?>media-playback-pause.png" alt="Pause" /></div>
 						
 				<span id="previous-image-cell"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>><a href="#null" id="prev-image-link" style="margin:0 10px;" onclick="javascript:changeImage(<?php echo $prevThumbPosition; ?>);return false;"><img src="<?php echo $imageBasePath; ?>media-seek-backward.png" alt="Previous Image" /></a></span>
-				<a href="#null" id="slideshow-link" style="margin:0 10px;" slideshowStatus="Play"><script type="text/javascript">$(document).ready(function() { $("#slideshow-link").html($("#playHtml").html()); });</script></a>
+				<a href="#null" id="slideshow-link" style="margin:0 10px;" slideshowStatus="<?php echo $slideshowLinkText; ?>"><img src="<?php echo $imageBasePath; ?>media-playback-<?php echo $slideshowLinkImg; ?>.png" alt="<?php echo $slideshowLinkText; ?>" /></a>
 				<span id="next-image-cell"<?php if(confEnablePreview) { ?> onmouseover="javascript:hidePreviewImage();"<?php } ?>><a href="#null" id="next-image-link" style="margin:0 10px;" onclick="javascript:changeImage(<?php echo $currentImageId + 1; ?>);return false;"><img src="<?php echo $imageBasePath; ?>media-seek-forward.png" alt="Next Image" /></a></span>
 				<a href="#null" id="photo-detail-link" style="margin:0 10px;"><img src="<?php echo $imageBasePath; ?>system-search.png" alt="Photo Details" /></a>
 				<a href="<?php echo $selectedAlbumPath . '/' . $currentAlbumArray[$currentImageId]; ?>" id="view-original" style="margin:0 10px;" target="_blank"><img src="<?php echo $imageBasePath; ?>view-fullscreen.png" alt="View Original" /></a>
