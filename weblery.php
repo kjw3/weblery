@@ -15,12 +15,14 @@
 
 <?php
 // As of v1.2, Weblery attempts to figure out it's own paths now
-$parsedUrl = parse_url($_SERVER['REQUEST_URI']);
+
+$relDir = dirname(dirname($_SERVER['SCRIPT_NAME'])) . '/';
 $webleryDir = preg_replace('/^\//', '', str_replace('\\', '/', str_replace(dirname(realpath(dirname(__FILE__))), '', dirname(__FILE__))));
 $includedFrom = preg_replace('/^\//', '', str_replace('\\', '/', dirname($_SERVER["SCRIPT_NAME"])));
 $webleryDir .= '/';
 $includedFrom .= '/';
-$webleryDirRelDocRoot = str_replace("//","/",'/'.$webleryDir);
+
+$webleryDirRelDocRoot = str_replace("//","/",'/'.$relDir.'/weblery/');
 
 if ($webleryDir == $includedFrom || baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php' || $webleryDir == '/')
 	$webleryDir = '';
@@ -74,7 +76,7 @@ class weblery {
 		self::__set('imgBasePath',self::__get('webleryBasePathRelDocRoot') . 'assets/img/');
 		self::__set('layoutFile',self::__get('webleryBasePath') . 'assets/layout/'.confLayoutFile);
 		self::__set('nakedLayoutFile',self::__get('webleryBasePath') . 'assets/layout/naked.php');
-		
+
 		if (baseName($_SERVER['SCRIPT_NAME']) == 'weblery.php') { //Needed for album initialization
 			self::__set('initGalleryBasePath',confGalleryBasePath);
 			self::__set('albumCachePath','assets/album_cache');
@@ -91,6 +93,7 @@ class weblery {
 
 		$tempAlbumArray = self::getAlbumArray();
 
+		self::__set('lastStartNumber',0);
 		if (count($tempAlbumArray)) {
 			self::__set('selectedAlbum',array_shift(array_values($tempAlbumArray)));
 
@@ -435,6 +438,7 @@ class weblery {
 		$currentStart = self::__get('start');
 		$currentStartImageId = self::__get('startImageId');
 		$thumbList = explode('|', self::getPhotoList());
+		$lastStartNumber = self::__get('lastStartNumber');
 
 		$currentImageId = 0;
 		if (is_numeric($currentStartImageId)) 
@@ -492,13 +496,14 @@ class weblery {
 				var curNaked = 0;
 				<?php if (self::__get("naked") == true) { ?> curNaked = 1; <?php } ?>
 
-				var curSelectedAlbum = '<?php echo self::__get('selectedAlbum'); ?>';
+				var curSelectedAlbum = '<?php echo self::__get("selectedAlbum"); ?>';
 				var initStart = 0;
 				var curStart = 0;
 				var curStartImageId = 0;
 				var curPlay = 0;
 				var subtractor = 16;
 				var subtractorMax = thumbArray.length;
+				var lastStartNumber = <?php echo strlen($lastStartNumber) > 0? $lastStartNumber:0; ?>;
 				
 				if (arrayPosition == thumbArray.length || arrayPosition == 0 && <?php echo $currentImageId; ?> != 0) {
 					recallWeblery = true;
@@ -523,7 +528,7 @@ class weblery {
 					curStartImageId = curStart;
 
 					if (arrayPosition == <?php echo count($currentAlbumArray)-1; ?>) {
-						curStart = <?php if (strlen(self::__get('lastStartNumber')) <= 0) { echo 0; } else { echo self::__get('lastStartNumber'); } ?>;
+						curStart = lastStartNumber;
 						curStartImageId = thumbArray.length - 1;
 					}
 
