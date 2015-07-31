@@ -92,7 +92,9 @@ class weblery {
 		$tempAlbumArray = $this->getAlbumArray();
 
 		if (count($tempAlbumArray)) {
-			$this->__set('selectedAlbum',array_shift(array_values($tempAlbumArray)));
+			$tempAlbumArrayValues = array_values($tempAlbumArray);
+			$tempAlbumArrayShifted = array_shift($tempAlbumArrayValues);
+			$this->__set('selectedAlbum',$tempAlbumArrayShifted);
 
 			if (isset($_GET['selectedAlbum']) && in_array($_GET['selectedAlbum'],$tempAlbumArray) && strlen($_GET['selectedAlbum']) > 0) {
 				if(strpos($_GET['selectedAlbum'], "'") > -1) die("Please remove any apostrophes from the album name.");
